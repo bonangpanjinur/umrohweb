@@ -17,27 +17,20 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
 ?>
 
 <style>
-    /* Sembunyikan Scrollbar tapi tetap bisa scroll */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    /* Smooth Scroll padding untuk sticky header */
-    html { scroll-padding-top: 140px; }
 </style>
 
-<!-- HERO SECTION: Premium Dark Look -->
+<!-- HERO SECTION -->
 <section class="relative h-[40vh] md:h-[50vh] flex items-end pb-12 justify-center text-white bg-slate-900 overflow-hidden">
-    <!-- Background Image dengan Parallax effect sederhana -->
-    <div class="absolute inset-0 bg-cover bg-center bg-fixed transition-transform duration-1000 scale-105" 
+    <div class="absolute inset-0 bg-cover bg-center bg-fixed transition-transform duration-1000 hover:scale-105" 
          style="background-image: url('<?php echo esc_url($banner_url); ?>');">
     </div>
-    <!-- Gradient Overlay supaya teks terbaca -->
     <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
     
     <div class="relative z-10 container mx-auto px-6 text-center">
-        <!-- Badge Verified -->
         <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full mb-4">
-            <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812z" clip-rule="evenodd"></path></svg>
             <span class="text-xs font-semibold tracking-wide uppercase text-blue-50">Partner Resmi</span>
         </div>
         <h1 class="text-3xl md:text-5xl font-extrabold mb-2 tracking-tight"><?php the_title(); ?></h1>
@@ -47,11 +40,10 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
     </div>
 </section>
 
-<!-- MAIN CONTENT AREA -->
+<!-- MAIN CONTENT -->
 <div class="bg-slate-50 min-h-screen pb-20">
     
     <?php
-    // Query Paket
     $args = array(
         'post_type' => 'umroh_package',
         'posts_per_page' => -1, 
@@ -61,7 +53,6 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
     $packages = new WP_Query($args);
 
     if ($packages->have_posts()) :
-        // Logic Filter
         $used_terms = array(); 
         while ($packages->have_posts()) : $packages->the_post();
             $terms = get_the_terms(get_the_ID(), 'package_category');
@@ -74,16 +65,13 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
         $packages->rewind_posts();
     ?>
 
-    <!-- STICKY FILTER BAR (UX Improvement) -->
-    <div class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-300" id="stickyFilter">
+    <!-- STICKY FILTER BAR -->
+    <div class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-300">
         <div class="container mx-auto px-4 md:px-6 py-3 md:py-4">
-            <!-- Horizontal Scroll Container for Mobile -->
             <div class="flex overflow-x-auto gap-3 pb-1 no-scrollbar items-center md:justify-center">
-                <button class="filter-btn active whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-teal-600 text-white shadow-md shadow-teal-200" data-filter="all">
-                    Semua Paket
-                </button>
+                <button class="filter-btn active whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold bg-teal-600 text-white shadow-md shadow-teal-200" data-filter="all">Semua Paket</button>
                 <?php foreach($used_terms as $term): ?>
-                <button class="filter-btn whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-white text-slate-600 border border-slate-200 hover:border-teal-500 hover:text-teal-600" data-filter="cat-<?php echo $term->term_id; ?>">
+                <button class="filter-btn whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold bg-white text-slate-600 border border-slate-200 hover:border-teal-500 hover:text-teal-600" data-filter="cat-<?php echo $term->term_id; ?>">
                     <?php echo esc_html($term->name); ?>
                 </button>
                 <?php endforeach; ?>
@@ -91,30 +79,21 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
         </div>
     </div>
 
-    <!-- GRID PAKET -->
-    <div class="container mx-auto px-4 md:px-6 py-8">
+    <!-- GRID PAKET (ID: #paket) -->
+    <div id="paket" class="container mx-auto px-4 md:px-6 py-8 scroll-mt-24">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <?php while ($packages->have_posts()) : $packages->the_post(); 
                 $post_terms = get_the_terms(get_the_ID(), 'package_category');
                 $filter_classes = '';
-                if ($post_terms) {
-                    foreach ($post_terms as $t) $filter_classes .= ' cat-' . $t->term_id;
-                }
+                if ($post_terms) { foreach ($post_terms as $t) $filter_classes .= ' cat-' . $t->term_id; }
                 $price = get_post_meta(get_the_ID(), '_package_price', true);
                 $img_src = has_post_thumbnail() ? get_the_post_thumbnail_url(get_the_ID(), 'large') : 'https://placehold.co/600x800/e2e8f0/64748b?text=Flayer+Paket';
             ?>
             
-            <!-- CARD DESIGN BARU -->
             <div class="package-item bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group <?php echo $filter_classes; ?>">
-                
-                <!-- Image Wrapper -->
                 <div class="relative aspect-[4/5] md:aspect-[4/3] overflow-hidden bg-slate-100">
                     <img src="<?php echo esc_url($img_src); ?>" alt="<?php the_title(); ?>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    
-                    <!-- Gradient Overlay bottom untuk teks agar jelas -->
                     <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                    <!-- Category Badge -->
                     <?php if($post_terms): $first_term = reset($post_terms); ?>
                     <span class="absolute top-4 left-4 bg-white/90 backdrop-blur text-teal-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                         <?php echo $first_term->name; ?>
@@ -122,35 +101,27 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
                     <?php endif; ?>
                 </div>
 
-                <!-- Content -->
                 <div class="p-5 flex flex-col flex-grow">
                     <h3 class="text-lg font-bold text-slate-800 mb-2 leading-tight group-hover:text-teal-600 transition-colors">
                         <?php the_title(); ?>
                     </h3>
-                    
-                    <!-- Pseudo Features (Ikon Pemanis) -->
                     <div class="flex items-center gap-4 text-xs text-slate-500 mb-4 border-b border-slate-100 pb-4">
                         <div class="flex items-center gap-1"><span class="text-amber-400">★★★★</span> Hotel</div>
                         <div class="flex items-center gap-1">✈️ Direct</div>
                         <div class="flex items-center gap-1">📅 Sesuai Jadwal</div>
                     </div>
-
-                    <!-- Footer Card: Price & CTA -->
                     <div class="mt-auto">
                         <p class="text-slate-400 text-xs mb-1">Mulai dari</p>
                         <div class="flex justify-between items-end">
                             <div class="text-xl md:text-2xl font-extrabold text-teal-600">
                                 <?php echo esc_html($price ?: 'Hubungi Kami'); ?>
                             </div>
-                            <!-- Tombol Mini -->
                             <a href="https://api.whatsapp.com/send?phone=<?php echo esc_attr($phone); ?>&text=Assalamu'alaikum%2C%20saya%20tertarik%20paket%20<?php echo urlencode(get_the_title()); ?>" target="_blank" class="bg-teal-50 text-teal-700 p-2 rounded-lg hover:bg-teal-600 hover:text-white transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                             </a>
                         </div>
                     </div>
                 </div>
-
-                <!-- Full Area Click (Optional, link ke WA juga) -->
                 <a href="https://api.whatsapp.com/send?phone=<?php echo esc_attr($phone); ?>&text=Assalamu'alaikum%2C%20saya%20tertarik%20paket%20<?php echo urlencode(get_the_title()); ?>" target="_blank" class="absolute inset-0 z-0"></a>
             </div>
             <?php endwhile; ?>
@@ -158,7 +129,6 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
     </div>
 
     <?php else: ?>
-    <!-- Empty State UX -->
     <div class="container mx-auto px-6 py-20 text-center">
         <div class="inline-block p-6 bg-slate-100 rounded-full mb-4">
             <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -170,27 +140,17 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
 
 </div>
 
-<!-- INFO TABS SECTION (UX Improvement) -->
-<section class="bg-white border-t border-slate-200">
+<!-- INFO TABS SECTION (ID: #tentang & #testimoni) -->
+<section id="tentang" class="bg-white border-t border-slate-200 scroll-mt-24">
     <div class="container mx-auto px-4 md:px-6 py-12 max-w-5xl">
         
-        <!-- Tab Headers -->
         <div class="flex justify-center border-b border-slate-200 mb-8 overflow-x-auto no-scrollbar">
-            <button onclick="switchTab('about')" id="tab-about" class="tab-btn active px-6 py-3 text-sm md:text-base font-bold text-teal-600 border-b-2 border-teal-600 transition-all whitespace-nowrap">
-                Tentang Travel
-            </button>
-            <button onclick="switchTab('faq')" id="tab-faq" class="tab-btn px-6 py-3 text-sm md:text-base font-medium text-slate-500 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-200 transition-all whitespace-nowrap">
-                Tanya Jawab (FAQ)
-            </button>
-            <button onclick="switchTab('testi')" id="tab-testi" class="tab-btn px-6 py-3 text-sm md:text-base font-medium text-slate-500 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-200 transition-all whitespace-nowrap">
-                Testimoni Jamaah
-            </button>
+            <button onclick="switchTab('about')" id="tab-about" class="tab-btn active px-6 py-3 text-sm md:text-base font-bold text-teal-600 border-b-2 border-teal-600 transition-all whitespace-nowrap">Tentang Travel</button>
+            <button onclick="switchTab('faq')" id="tab-faq" class="tab-btn px-6 py-3 text-sm md:text-base font-medium text-slate-500 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-200 transition-all whitespace-nowrap">FAQ</button>
+            <button onclick="switchTab('testi')" id="tab-testi" class="tab-btn px-6 py-3 text-sm md:text-base font-medium text-slate-500 hover:text-teal-600 border-b-2 border-transparent hover:border-teal-200 transition-all whitespace-nowrap">Testimoni</button>
         </div>
 
-        <!-- Tab Contents -->
         <div class="min-h-[300px]">
-            
-            <!-- CONTENT: ABOUT -->
             <div id="content-about" class="tab-content fade-in-up">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="md:col-span-2 prose max-w-none text-slate-600">
@@ -214,7 +174,6 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
                 </div>
             </div>
 
-            <!-- CONTENT: FAQ -->
             <div id="content-faq" class="tab-content hidden fade-in-up">
                 <div class="max-w-3xl mx-auto space-y-4">
                     <?php if(!empty($faqs)): foreach($faqs as $faq): ?>
@@ -223,9 +182,7 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
                             <?php echo esc_html($faq['q']); ?>
                             <svg class="w-5 h-5 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <div class="hidden px-6 py-4 text-slate-600 border-t border-slate-100 bg-white leading-relaxed">
-                            <?php echo nl2br(esc_html($faq['a'])); ?>
-                        </div>
+                        <div class="hidden px-6 py-4 text-slate-600 border-t border-slate-100 bg-white leading-relaxed"><?php echo nl2br(esc_html($faq['a'])); ?></div>
                     </div>
                     <?php endforeach; else: ?>
                         <p class="text-center text-slate-500">Belum ada data FAQ.</p>
@@ -233,7 +190,8 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
                 </div>
             </div>
 
-            <!-- CONTENT: TESTIMONI -->
+            <!-- ID TESTIMONI UNTUK MENU SCROLL -->
+            <div id="testimoni"></div>
             <div id="content-testi" class="tab-content hidden fade-in-up">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <?php if(!empty($testis)): foreach($testis as $testi): ?>
@@ -257,59 +215,49 @@ $banner_url = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'ful
     </div>
 </section>
 
-<!-- JAVASCRIPT: FILTER & TABS -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // 1. LOGIC FILTER
     const filterBtns = document.querySelectorAll('.filter-btn');
     const items = document.querySelectorAll('.package-item');
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Reset Style Tombol
             filterBtns.forEach(b => {
                 b.classList.remove('active', 'bg-teal-600', 'text-white', 'shadow-md');
                 b.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
             });
-            // Set Active Tombol
             btn.classList.add('active', 'bg-teal-600', 'text-white', 'shadow-md');
             btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
 
             const filterValue = btn.getAttribute('data-filter');
-
             items.forEach(item => {
                 if(filterValue === 'all' || item.classList.contains(filterValue)) {
-                    item.parentElement.style.display = 'block'; // Tampilkan wrapper
-                    setTimeout(() => {
-                        item.classList.remove('opacity-0', 'scale-95');
-                        item.classList.add('opacity-100', 'scale-100');
-                    }, 50);
+                    item.parentElement.style.display = 'block';
+                    setTimeout(() => { item.classList.remove('opacity-0', 'scale-95'); item.classList.add('opacity-100', 'scale-100'); }, 50);
                 } else {
-                    item.parentElement.style.display = 'none'; // Sembunyikan wrapper
+                    item.parentElement.style.display = 'none';
                     item.classList.add('opacity-0', 'scale-95');
                 }
             });
         });
     });
 
-    // 2. LOGIC TABS
     window.switchTab = function(tabName) {
-        // Hide all content
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        // Remove active class from buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('text-teal-600', 'border-teal-600', 'font-bold');
             btn.classList.add('text-slate-500', 'border-transparent', 'font-medium');
         });
-
-        // Show selected content
         document.getElementById('content-' + tabName).classList.remove('hidden');
-        // Activate button
         const activeBtn = document.getElementById('tab-' + tabName);
         activeBtn.classList.add('text-teal-600', 'border-teal-600', 'font-bold');
         activeBtn.classList.remove('text-slate-500', 'border-transparent', 'font-medium');
     };
+    
+    // Auto switch tab saat klik menu testimoni
+    const hash = window.location.hash;
+    if(hash === '#testimoni') switchTab('testi');
+    if(hash === '#tentang') switchTab('about');
 });
 </script>
 

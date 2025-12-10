@@ -11,6 +11,7 @@
     <style>
         html {
             scroll-behavior: smooth;
+            scroll-padding-top: 100px; /* Jarak aman saat klik menu agar tidak tertutup header */
         }
         body { font-family: 'Inter', sans-serif; }
         .hero-bg {
@@ -18,7 +19,6 @@
             background-size: cover;
             background-position: center;
         }
-        /* Style untuk animasi fade-in yang lebih lembut */
         .fade-in-element {
             opacity: 0;
             transform: translateY(30px);
@@ -32,30 +32,57 @@
 </head>
 <body <?php body_class('bg-slate-50'); ?>>
 
-    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40">
+    <header class="bg-white/90 backdrop-blur-lg shadow-sm sticky top-0 z-40 transition-all duration-300">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <!-- PERBAIKAN: Ukuran font brand dikecilkan di mobile -->
-            <a href="<?php echo home_url(); ?>" class="text-xl md:text-2xl font-bold text-teal-600"><?php echo esc_html(get_theme_mod('brand_name', 'UmrohWeb ID')); ?></a>
             
-            <?php if ( is_page_template('page-landing-murah.php') ): ?>
-                <!-- Navigasi Khusus Halaman Promo -->
+            <!-- LOGO / BRAND -->
+            <?php if ( is_singular('travel') ): ?>
+                <!-- Jika Halaman Travel: Tampilkan Nama Travel -->
+                <a href="<?php the_permalink(); ?>" class="text-xl md:text-2xl font-bold text-slate-800 truncate max-w-[200px] md:max-w-xs">
+                    <?php the_title(); ?>
+                </a>
+            <?php else: ?>
+                <!-- Jika Halaman Utama: Tampilkan Brand Web -->
+                <a href="<?php echo home_url(); ?>" class="text-xl md:text-2xl font-bold text-teal-600">
+                    <?php echo esc_html(get_theme_mod('brand_name', 'UmrohWeb ID')); ?>
+                </a>
+            <?php endif; ?>
+            
+            
+            <!-- NAVIGASI MENU (LOGIKA KONDISIONAL) -->
+            <?php if ( is_singular('travel') ): ?>
+                <!-- A. MENU KHUSUS HALAMAN TRAVEL -->
+                <nav class="hidden md:flex space-x-6 text-slate-600 font-medium">
+                    <a href="#paket" class="hover:text-teal-600 transition">Daftar Paket</a>
+                    <a href="#tentang" class="hover:text-teal-600 transition">Tentang Kami</a>
+                    <a href="#testimoni" class="hover:text-teal-600 transition">Testimoni</a>
+                </nav>
+                
+                <!-- Tombol Kembali ke Direktori -->
+                <a href="<?php echo home_url(); ?>" class="bg-slate-800 text-white font-bold px-4 md:px-6 py-2 rounded-full hover:bg-slate-900 transition duration-300 text-sm md:text-base whitespace-nowrap flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <span class="hidden sm:inline">Cari Travel Lain</span>
+                    <span class="sm:hidden">Cari Lain</span>
+                </a>
+
+            <?php elseif ( is_page_template('page-landing-murah.php') ): ?>
+                <!-- B. MENU HALAMAN LANDING PAGE PROMO -->
                 <nav class="hidden md:flex space-x-6 text-slate-700 font-semibold">
                     <a href="<?php echo home_url(); ?>#desain" class="hover:text-teal-600">Desain Kami</a>
-                    <a href="<?php echo home_url(); ?>#harga" class="hover:text-teal-600">Paket Harga</a>
                     <a href="#detail-paket" class="hover:text-teal-600">Detail Promo</a>
                     <a href="#upgrade" class="hover:text-teal-600">Opsi Upgrade</a>
                 </nav>
+                <a href="https://api.whatsapp.com/send?phone=<?php echo esc_html(get_theme_mod('contact_whatsapp', '6281283596622')); ?>" target="_blank" class="bg-teal-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-teal-700 transition">Pesan Promo</a>
+
             <?php else: ?>
-                <!-- Navigasi Halaman Utama -->
+                <!-- C. MENU UTAMA DEFAULT -->
                 <nav class="hidden md:flex space-x-6 text-slate-700 font-semibold">
                     <a href="#desain" class="hover:text-teal-600">Desain Kami</a>
                     <a href="#harga" class="hover:text-teal-600">Paket Harga</a>
                     <a href="#faq" class="hover:text-teal-600">Tanya Jawab</a>
                 </nav>
+                <a href="https://api.whatsapp.com/send?phone=<?php echo esc_html(get_theme_mod('contact_whatsapp', '6281283596622')); ?>" target="_blank" class="bg-teal-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-teal-700 transition">Konsultasi Gratis</a>
             <?php endif; ?>
 
-            <!-- PERBAIKAN: Padding (px-4) dan ukuran font (text-sm) dikecilkan di mobile, lalu dibesarkan di desktop (md:) -->
-            <a href="https://api.whatsapp.com/send?phone=<?php echo esc_html(get_theme_mod('contact_whatsapp', '6281283596622')); ?>&text=Halo%2C%20saya%20tertarik%20untuk%20konsultasi%20gratis%20pembuatan%20website%20umroh." target="_blank" class="bg-teal-600 text-white font-bold px-4 md:px-6 py-2 rounded-lg hover:bg-teal-700 transition duration-300 text-sm md:text-base whitespace-nowrap">Konsultasi Gratis</a>
         </div>
     </header>
-
