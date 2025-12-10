@@ -1,6 +1,6 @@
 <?php 
 /**
- * Template Name: Single Travel Page (Fixed Header)
+ * Template Name: Single Travel Page (Fixed Header & Carousel)
  */
 get_header(); 
 
@@ -11,13 +11,13 @@ $maps_url = get_post_meta($travel_id, '_travel_maps', true);
 $faqs = get_post_meta($travel_id, '_travel_faqs', true) ?: [];
 $testis = get_post_meta($travel_id, '_travel_testis', true) ?: [];
 
-// BANNER LOGIC
+// BANNER LOGIC (CAROUSEL)
 $b1 = get_post_meta($travel_id, '_travel_banner_1', true);
 $b2 = get_post_meta($travel_id, '_travel_banner_2', true);
 $b3 = get_post_meta($travel_id, '_travel_banner_3', true);
 $banners = array_filter([$b1, $b2, $b3]);
 
-// Fallback Banner jika kosong
+// Jika kosong, pakai Featured Image
 if (empty($banners)) {
     $banners[] = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'full') : 'https://placehold.co/1920x800/0f172a/ffffff?text=Travel+Umroh+Terpercaya';
 }
@@ -26,27 +26,34 @@ if (empty($banners)) {
 <!-- SWIPER CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
+    /* Styling Navigasi Slider */
     .swiper-pagination-bullet { background: white; opacity: 0.6; width: 10px; height: 10px; }
     .swiper-pagination-bullet-active { background: #14b8a6; opacity: 1; }
+    .swiper-button-next, .swiper-button-prev { color: white; opacity: 0.7; }
+    .swiper-button-next:hover, .swiper-button-prev:hover { opacity: 1; }
 </style>
 
 <!-- CAROUSEL BANNER SECTION -->
-<!-- Tidak perlu padding-top disini karena sudah di body -->
 <section class="relative h-[50vh] md:h-[65vh] bg-slate-900 w-full overflow-hidden">
     <div class="swiper mySwiper h-full w-full">
         <div class="swiper-wrapper">
             <?php foreach($banners as $banner_img): ?>
             <div class="swiper-slide relative">
                 <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?php echo esc_url($banner_img); ?>');"></div>
-                <!-- Overlay Gradient -->
+                <!-- Overlay Gradient agar teks terbaca -->
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-90"></div>
             </div>
             <?php endforeach; ?>
         </div>
+        <!-- Pagination & Navigation -->
         <div class="swiper-pagination"></div>
+        <?php if(count($banners) > 1): ?>
+            <div class="swiper-button-next hidden md:flex"></div>
+            <div class="swiper-button-prev hidden md:flex"></div>
+        <?php endif; ?>
     </div>
 
-    <!-- Text Overlay -->
+    <!-- Text Overlay di Atas Banner -->
     <div class="absolute inset-0 z-10 flex items-end pb-12 justify-center pointer-events-none">
         <div class="container mx-auto px-6 text-center pointer-events-auto">
             <h1 class="text-3xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-3"><?php the_title(); ?></h1>
@@ -57,7 +64,8 @@ if (empty($banners)) {
     </div>
 </section>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN CONTENT (PAKET, TENTANG, DLL) -->
+<!-- Menggunakan margin minus agar sedikit menumpuk banner untuk efek modern -->
 <div class="bg-slate-50 min-h-screen pb-20 -mt-6 relative z-20 rounded-t-3xl shadow-lg">
     
     <?php
@@ -65,7 +73,7 @@ if (empty($banners)) {
     $packages = new WP_Query($args);
     ?>
 
-    <!-- STICKY FILTER -->
+    <!-- STICKY FILTER MENU (Menempel saat scroll) -->
     <div class="sticky top-[80px] z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm py-4">
         <div class="container mx-auto px-4 flex overflow-x-auto gap-3 pb-1 no-scrollbar md:justify-center">
             <button class="filter-btn active whitespace-nowrap px-6 py-2 rounded-full text-sm font-bold bg-teal-600 text-white shadow-md transition-all" data-filter="all">Semua Paket</button>
@@ -174,9 +182,16 @@ if (empty($banners)) {
     </div>
 </section>
 
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    new Swiper(".mySwiper", { autoplay: { delay: 4000 }, loop: true, pagination: { el: ".swiper-pagination" } });
+    // Initialize Swiper
+    new Swiper(".mySwiper", { 
+        autoplay: { delay: 4000, disableOnInteraction: false }, 
+        loop: true, 
+        pagination: { el: ".swiper-pagination", clickable: true },
+        navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
+    });
 
     // Filter Logic
     const filterBtns = document.querySelectorAll('.filter-btn');

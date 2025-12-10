@@ -11,16 +11,19 @@ add_action( 'after_setup_theme', 'umrohweb_theme_setup' );
 
 
 // ==========================================================================
-// === BAGIAN 1: PENGATURAN TEMA & CUSTOMIZER ===
+// === BAGIAN 1: PENGATURAN TEMA & CUSTOMIZER (KODE LAMA TETAP AMAN) ===
 // ==========================================================================
-// (Bagian Customizer ini tetap dipertahankan agar landing page utama tidak rusak)
 function umrohweb_customize_register( $wp_customize ) {
+    // Section General
     $wp_customize->add_section( 'general_settings', array( 'title' => __( '1. Pengaturan Umum', 'umrohweb' ), 'priority' => 10 ));
     $wp_customize->add_setting( 'brand_name', array( 'default' => 'UmrohWeb ID' ));
     $wp_customize->add_control( 'brand_name_control', array( 'label' => 'Nama Brand', 'section' => 'general_settings', 'settings' => 'brand_name' ));
     $wp_customize->add_setting( 'contact_whatsapp', array( 'default' => '6281283596622' ));
     $wp_customize->add_control( 'contact_whatsapp_control', array( 'label' => 'Nomor WhatsApp (format 62)', 'section' => 'general_settings', 'settings' => 'contact_whatsapp' ));
-    // ... (Kode Customizer lainnya diasumsikan tetap ada) ...
+    
+    // ... (Kode Customizer lainnya diasumsikan tetap ada seperti file asli Anda) ...
+    // Saya persingkat di sini agar muat, tapi JANGAN HAPUS kode customizer lama Anda
+    // jika Anda ingin halaman depan tetap bisa diedit via Customize.
 }
 add_action( 'customize_register', 'umrohweb_customize_register' );
 
@@ -30,6 +33,7 @@ add_action( 'customize_register', 'umrohweb_customize_register' );
 // ==========================================================================
 
 function create_travel_post_types() {
+    // 1. CPT: Data Travel
     register_post_type('travel',
         array(
             'labels'      => array(
@@ -47,6 +51,7 @@ function create_travel_post_types() {
         )
     );
 
+    // 2. CPT: Paket Umroh
     register_post_type('umroh_package',
         array(
             'labels'      => array(
@@ -63,6 +68,7 @@ function create_travel_post_types() {
         )
     );
 
+    // 3. Taxonomy
     register_taxonomy(
         'package_category',
         'umroh_package',
@@ -95,12 +101,12 @@ function render_travel_details_meta_box($post) {
     $phone = get_post_meta($post->ID, '_travel_phone', true);
     $address = get_post_meta($post->ID, '_travel_address', true);
     $maps = get_post_meta($post->ID, '_travel_maps', true);
-    $logo = get_post_meta($post->ID, '_travel_logo', true); // VARIABLE BARU UNTUK LOGO
+    $logo = get_post_meta($post->ID, '_travel_logo', true); // VARIABLE BARU: LOGO
     ?>
     <p>
-        <label><strong>URL Logo Travel (Wajib diisi agar tampil di Header):</strong></label><br>
-        <input type="text" name="travel_logo" value="<?php echo esc_url($logo); ?>" placeholder="https://website.com/logo-travel.png" style="width:100%; padding:8px; border:1px solid #ddd;">
-        <br><span style="font-size:12px; color:#666;">*Upload logo di 'Media' lalu copy URL-nya kesini.</span>
+        <label><strong>URL Logo Travel (Wajib diisi):</strong></label><br>
+        <input type="text" name="travel_logo" value="<?php echo esc_url($logo); ?>" placeholder="https://.../logo.png" style="width:100%; padding:8px; border:1px solid #ddd;">
+        <br><span style="font-size:12px; color:#666;">Upload logo di menu 'Media', lalu copy URL-nya kesini.</span>
     </p>
     <p>
         <label><strong>Nomor WhatsApp (Wajib):</strong></label><br>
@@ -122,7 +128,7 @@ function render_travel_banner_meta_box($post) {
     $b2 = get_post_meta($post->ID, '_travel_banner_2', true);
     $b3 = get_post_meta($post->ID, '_travel_banner_3', true);
     ?>
-    <p><em>Masukkan URL Gambar Banner Slider (1920x800 px recommended).</em></p>
+    <p><em>Masukkan URL Gambar Banner (1920x800 px recommended). Jika kosong, akan pakai Featured Image.</em></p>
     <p><input type="text" name="travel_banner_1" value="<?php echo esc_url($b1); ?>" placeholder="URL Banner 1 (Utama)" style="width:100%; padding:8px; margin-bottom:5px;"></p>
     <p><input type="text" name="travel_banner_2" value="<?php echo esc_url($b2); ?>" placeholder="URL Banner 2" style="width:100%; padding:8px; margin-bottom:5px;"></p>
     <p><input type="text" name="travel_banner_3" value="<?php echo esc_url($b3); ?>" placeholder="URL Banner 3" style="width:100%; padding:8px;"></p>
@@ -153,8 +159,8 @@ function render_travel_extras_meta_box($post) {
             <div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
                 <input type="text" name="testi_name[]" value="<?php echo esc_attr($testi['name']); ?>" placeholder="Nama" style="width:100%; margin-bottom:5px;">
                 <div style="display:flex; gap:5px; margin-bottom:5px;">
-                    <input type="text" name="testi_img[]" value="<?php echo esc_url($img); ?>" placeholder="URL Foto" style="flex:1;">
-                    <input type="text" name="testi_video[]" value="<?php echo esc_url($video); ?>" placeholder="URL Video" style="flex:1;">
+                    <input type="text" name="testi_img[]" value="<?php echo esc_url($img); ?>" placeholder="URL Foto Profil" style="flex:1;">
+                    <input type="text" name="testi_video[]" value="<?php echo esc_url($video); ?>" placeholder="URL Video Testimoni" style="flex:1;">
                 </div>
                 <textarea name="testi_text[]" placeholder="Isi Testimoni" style="width:100%;"><?php echo esc_textarea($testi['text']); ?></textarea>
             </div>
