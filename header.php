@@ -8,24 +8,21 @@
     <?php wp_head(); ?>
     <style>
         html { scroll-behavior: smooth; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; padding-top: 80px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Padding top agar konten tidak tertutup Header Fixed */
-        body { padding-top: 80px; }
     </style>
 </head>
 <body <?php body_class('bg-slate-50 text-slate-800'); ?>>
 
-    <!-- HEADER FIXED (PUTIH SOLID) -->
+    <!-- NAVBAR FIXED & SOLID WHITE -->
     <header class="fixed top-0 left-0 right-0 w-full bg-white shadow-md z-50 h-[80px] flex items-center transition-all duration-300">
         <div class="container mx-auto px-4 md:px-6 flex justify-between items-center w-full">
             
-            <!-- 1. LOGO AREA (SINKRON DENGAN DATA TRAVEL) -->
+            <!-- 1. LOGO AREA (DINAMIS) -->
             <div class="flex items-center gap-3">
                 <?php if ( is_singular('travel') ): 
-                    // Ambil Logo Travel
+                    // AMBIL LOGO KHUSUS TRAVEL
                     $travel_logo = get_post_meta( get_the_ID(), '_travel_logo', true );
                 ?>
                     <!-- JIKA DI HALAMAN TRAVEL -->
@@ -42,26 +39,21 @@
                     <?php endif; ?>
 
                 <?php else: ?>
-                    <!-- JIKA DI HALAMAN UTAMA -->
+                    <!-- JIKA DI HALAMAN UTAMA (LANDING PAGE) -->
                     <a href="<?php echo home_url(); ?>" class="text-2xl font-extrabold text-teal-600 tracking-tight">
                         <?php echo esc_html(get_theme_mod('brand_name', 'UmrohWeb')); ?>
                     </a>
                 <?php endif; ?>
             </div>
 
-            <!-- 2. MENU NAVIGASI -->
+            <!-- 2. DESKTOP MENU (DINAMIS) -->
             <nav class="hidden md:flex items-center space-x-6">
                 <?php if ( is_singular('travel') ): ?>
-                    <!-- Menu Halaman Travel (Link ke ID) -->
+                    <!-- Menu Halaman Travel (TANPA Tombol Travel Lain) -->
                     <a href="#paket" class="font-semibold text-slate-600 hover:text-teal-600 transition">Paket</a>
                     <a href="#tentang" class="font-semibold text-slate-600 hover:text-teal-600 transition">Profil</a>
                     <a href="#testimoni" class="font-semibold text-slate-600 hover:text-teal-600 transition">Testimoni</a>
-                    
-                    <!-- Tombol Kembali ke Direktori -->
-                    <a href="<?php echo home_url(); ?>" class="bg-slate-800 text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-slate-900 transition flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                        Travel Lain
-                    </a>
+                    <!-- Tombol 'Travel Lain' Dihapus Sesuai Request -->
                 <?php else: ?>
                     <!-- Menu Halaman Utama -->
                     <a href="#harga" class="font-semibold text-slate-600 hover:text-teal-600">Harga</a>
@@ -84,7 +76,7 @@
                 <a href="#paket" class="block font-semibold text-slate-600 border-b pb-2">Paket Umroh</a>
                 <a href="#tentang" class="block font-semibold text-slate-600 border-b pb-2">Tentang Kami</a>
                 <a href="#testimoni" class="block font-semibold text-slate-600 border-b pb-2">Testimoni</a>
-                <a href="<?php echo home_url(); ?>" class="block font-bold text-teal-600">← Cari Travel Lain</a>
+                <!-- Link Travel Lain di Mobile juga dihapus -->
             <?php else: ?>
                 <a href="#harga" class="block font-semibold text-slate-600">Harga Jasa</a>
                 <a href="#portfolio" class="block font-semibold text-slate-600">Portofolio</a>
@@ -95,5 +87,16 @@
     <script>
         const menuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
-        menuBtn.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+        
+        // Toggle Menu
+        menuBtn.addEventListener('click', () => { 
+            mobileMenu.classList.toggle('hidden'); 
+        });
+
+        // Close menu when clicking link (Mobile UX)
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
     </script>
