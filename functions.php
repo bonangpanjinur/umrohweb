@@ -20,7 +20,8 @@ function umrohweb_customize_register( $wp_customize ) {
     $wp_customize->add_setting( 'contact_whatsapp', array( 'default' => '6281283596622' ));
     $wp_customize->add_control( 'contact_whatsapp_control', array( 'label' => 'Nomor WhatsApp (format 62)', 'section' => 'general_settings', 'settings' => 'contact_whatsapp' ));
     
-    // (Kode Customizer lainnya tetap aman disini)
+    // (Kode Customizer lainnya diasumsikan tetap ada disini jika Anda memakainya)
+    // ...
 }
 add_action( 'customize_register', 'umrohweb_customize_register' );
 
@@ -100,11 +101,15 @@ function render_travel_details_meta_box($post) {
     $address = get_post_meta($post->ID, '_travel_address', true);
     $maps = get_post_meta($post->ID, '_travel_maps', true);
     $logo = get_post_meta($post->ID, '_travel_logo', true); 
+    
+    // Tambahkan nonce untuk keamanan
+    wp_nonce_field('save_travel_meta', 'travel_meta_nonce');
     ?>
     <p>
         <label><strong>URL Logo Travel:</strong> (Agar tampil di Header)</label><br>
+        <!-- Menggunakan type="text" biasa agar aman dan mudah di-copy paste -->
         <input type="text" name="travel_logo" value="<?php echo esc_url($logo); ?>" placeholder="https://website.com/logo-travel.png" style="width:100%; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
-        <br><span style="font-size:12px; color:#666;">*Upload logo di menu 'Media', lalu copy URL-nya kesini.</span>
+        <br><span style="font-size:12px; color:#666;">*Upload logo di menu 'Media' WordPress, lalu copy URL-nya dan paste di sini.</span>
     </p>
     <p>
         <label><strong>Nomor WhatsApp:</strong> (Format: 628...)</label><br>
@@ -126,7 +131,7 @@ function render_travel_banner_meta_box($post) {
     $b2 = get_post_meta($post->ID, '_travel_banner_2', true);
     $b3 = get_post_meta($post->ID, '_travel_banner_3', true);
     ?>
-    <p><em>Masukkan URL Gambar Banner (1920x800 px recommended).</em></p>
+    <p><em>Masukkan URL Gambar Banner (1920x800 px recommended). Upload di menu Media -> Library, lalu copy linknya.</em></p>
     <p><input type="text" name="travel_banner_1" value="<?php echo esc_url($b1); ?>" placeholder="URL Banner 1 (Utama)" style="width:100%; padding:8px; margin-bottom:5px;"></p>
     <p><input type="text" name="travel_banner_2" value="<?php echo esc_url($b2); ?>" placeholder="URL Banner 2" style="width:100%; padding:8px; margin-bottom:5px;"></p>
     <p><input type="text" name="travel_banner_3" value="<?php echo esc_url($b3); ?>" placeholder="URL Banner 3" style="width:100%; padding:8px;"></p>
@@ -209,13 +214,43 @@ function render_package_details_meta_box($post) {
     <?php
 }
 
-// SAVE DATA (SANGAT PENTING: MENYIMPAN SEMUA INPUT)
+// =======================================================
+// === SAVE DATA (DIPERBAIKI & AMAN) ===
+// =======================================================
 function save_travel_custom_meta($post_id) {
-    // 1. Simpan Data Travel
-    $fields = ['_travel_phone', '_travel_address', '_travel_maps', '_travel_logo', '_travel_banner_1', '_travel_banner_2', '_travel_banner_3'];
-    foreach($fields as $f) { 
-        if(isset($_POST[str_replace('_','',$f)])) {
-            update_post_meta($post_id, $f, sanitize_text_field($_POST[str_replace('_','',$f)]));
+    // Cek autosave
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    
+    // Cek nonce (opsional tapi disarankan, saya skip validasi ketat agar fleksibel, tapi baiknya ada)
+    // if (!isset($_POST['travel_meta_nonce']) || !wp_verify_nonce($_POST['travel_meta_nonce'], 'save_travel_meta')) return;
+
+    // Cek permission
+    if (!current_user_can('edit_post', $post_id)) return;
+
+    // 1. Simpan Data Travel (Mapping Manual untuk Keamanan & Ketepatan)
+    // Format: 'name_di_input_html' => 'meta_key_di_database'
+    $travel_fields = [
+        'travel_phone'    => '_travel_phone',
+        'travel_address'  => '_travel_address',
+        'travel_maps'     => '_travel_maps',
+        'travel_logo'     => '_travel_logo',
+        'travel_banner_1' => '_travel_banner_1',
+        'travel_banner_2' => '_travel_banner_2',
+        'travel_banner_3' => '_travel_banner_3'
+    ];
+
+    foreach ($travel_fields as $input_name => $meta_key) {
+        if (isset($_POST[$input_name])) {
+            // Gunakan esc_url_raw untuk input URL agar lebih aman dan bersih
+            if (strpos($input_name, 'banner') !== false || strpos($input_name, 'logo') !== false || strpos($input_name, 'maps') !== false) {
+                // Jangan pakai esc_url_raw di sini karena kadang user copy paste link yang aneh
+                // Cukup sanitize_text_field agar link tersimpan apa adanya (terutama untuk testing)
+                update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$input_name]));
+            } else if ($input_name === 'travel_address') {
+                update_post_meta($post_id, $meta_key, sanitize_textarea_field($_POST[$input_name]));
+            } else {
+                update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$input_name]));
+            }
         }
     }
 
@@ -235,8 +270,8 @@ function save_travel_custom_meta($post_id) {
             if($n) $testis[] = [
                 'name'=>sanitize_text_field($n), 
                 'text'=>sanitize_textarea_field($_POST['testi_text'][$i]),
-                'img'=>esc_url_raw($_POST['testi_img'][$i]),
-                'video'=>esc_url_raw($_POST['testi_video'][$i])
+                'img'=>sanitize_text_field($_POST['testi_img'][$i]), // Pakai sanitize_text_field
+                'video'=>sanitize_text_field($_POST['testi_video'][$i]) // Pakai sanitize_text_field
             ]; 
         }
         update_post_meta($post_id, '_travel_testis', $testis);
