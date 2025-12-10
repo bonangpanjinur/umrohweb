@@ -4,6 +4,7 @@
  */
 get_header(); 
 
+// 1. AMBIL SEMUA DATA (SINKRON DENGAN FUNCTIONS.PHP)
 $travel_id = get_the_ID();
 $phone = get_post_meta($travel_id, '_travel_phone', true);
 $address = get_post_meta($travel_id, '_travel_address', true);
@@ -11,13 +12,12 @@ $maps_url = get_post_meta($travel_id, '_travel_maps', true);
 $faqs = get_post_meta($travel_id, '_travel_faqs', true) ?: [];
 $testis = get_post_meta($travel_id, '_travel_testis', true) ?: [];
 
-// BANNER LOGIC (CAROUSEL)
+// Banner Logic
 $b1 = get_post_meta($travel_id, '_travel_banner_1', true);
 $b2 = get_post_meta($travel_id, '_travel_banner_2', true);
 $b3 = get_post_meta($travel_id, '_travel_banner_3', true);
 $banners = array_filter([$b1, $b2, $b3]);
 
-// Jika kosong, pakai Featured Image
 if (empty($banners)) {
     $banners[] = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'full') : 'https://placehold.co/1920x800/0f172a/ffffff?text=Travel+Umroh+Terpercaya';
 }
@@ -26,7 +26,6 @@ if (empty($banners)) {
 <!-- SWIPER CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
-    /* Styling Navigasi Slider */
     .swiper-pagination-bullet { background: white; opacity: 0.6; width: 10px; height: 10px; }
     .swiper-pagination-bullet-active { background: #14b8a6; opacity: 1; }
     .swiper-button-next, .swiper-button-prev { color: white; opacity: 0.7; }
@@ -40,12 +39,10 @@ if (empty($banners)) {
             <?php foreach($banners as $banner_img): ?>
             <div class="swiper-slide relative">
                 <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?php echo esc_url($banner_img); ?>');"></div>
-                <!-- Overlay Gradient agar teks terbaca -->
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-90"></div>
             </div>
             <?php endforeach; ?>
         </div>
-        <!-- Pagination & Navigation -->
         <div class="swiper-pagination"></div>
         <?php if(count($banners) > 1): ?>
             <div class="swiper-button-next hidden md:flex"></div>
@@ -53,7 +50,7 @@ if (empty($banners)) {
         <?php endif; ?>
     </div>
 
-    <!-- Text Overlay di Atas Banner -->
+    <!-- Text Overlay -->
     <div class="absolute inset-0 z-10 flex items-end pb-12 justify-center pointer-events-none">
         <div class="container mx-auto px-6 text-center pointer-events-auto">
             <h1 class="text-3xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-3"><?php the_title(); ?></h1>
@@ -64,8 +61,7 @@ if (empty($banners)) {
     </div>
 </section>
 
-<!-- MAIN CONTENT (PAKET, TENTANG, DLL) -->
-<!-- Menggunakan margin minus agar sedikit menumpuk banner untuk efek modern -->
+<!-- MAIN CONTENT -->
 <div class="bg-slate-50 min-h-screen pb-20 -mt-6 relative z-20 rounded-t-3xl shadow-lg">
     
     <?php
@@ -73,7 +69,7 @@ if (empty($banners)) {
     $packages = new WP_Query($args);
     ?>
 
-    <!-- STICKY FILTER MENU (Menempel saat scroll) -->
+    <!-- STICKY FILTER MENU -->
     <div class="sticky top-[80px] z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm py-4">
         <div class="container mx-auto px-4 flex overflow-x-auto gap-3 pb-1 no-scrollbar md:justify-center">
             <button class="filter-btn active whitespace-nowrap px-6 py-2 rounded-full text-sm font-bold bg-teal-600 text-white shadow-md transition-all" data-filter="all">Semua Paket</button>
@@ -95,7 +91,7 @@ if (empty($banners)) {
         </div>
     </div>
 
-    <!-- GRID PAKET -->
+    <!-- GRID PAKET (ID #paket) -->
     <div id="paket" class="container mx-auto px-4 md:px-6 py-10 scroll-mt-32">
         <?php if ($packages->have_posts()) : ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -131,7 +127,7 @@ if (empty($banners)) {
     </div>
 </div>
 
-<!-- TABS (Tentang, FAQ, Testi) -->
+<!-- TABS (ID #tentang & #testimoni) -->
 <section id="tentang" class="bg-white py-12 scroll-mt-24">
     <div class="container mx-auto px-4 max-w-5xl">
         <!-- Tab Nav -->
@@ -142,7 +138,7 @@ if (empty($banners)) {
         </div>
 
         <div class="min-h-[200px]">
-            <!-- About -->
+            <!-- About Content -->
             <div id="content-about" class="tab-content">
                 <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 prose max-w-none text-slate-600">
                     <?php the_content(); ?>
@@ -150,7 +146,7 @@ if (empty($banners)) {
                 </div>
             </div>
             
-            <!-- FAQ -->
+            <!-- FAQ Content -->
             <div id="content-faq" class="tab-content hidden space-y-3">
                 <?php if($faqs): foreach($faqs as $faq): ?>
                 <div class="border border-slate-200 rounded-xl overflow-hidden">
@@ -162,7 +158,8 @@ if (empty($banners)) {
                 <?php endforeach; else: echo '<p class="text-center text-slate-400">Belum ada FAQ.</p>'; endif; ?>
             </div>
 
-            <!-- Testi -->
+            <!-- Testimoni Content (ID #testimoni untuk scroll) -->
+            <div id="testimoni"></div>
             <div id="content-testi" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php if($testis): foreach($testis as $testi): 
                     $img = isset($testi['img']) ? $testi['img'] : '';
@@ -182,10 +179,10 @@ if (empty($banners)) {
     </div>
 </section>
 
-<!-- SCRIPTS -->
+<!-- SCRIPTS INTEGRASI (Tab & Filter) -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    // Initialize Swiper
+    // 1. Initialize Swiper
     new Swiper(".mySwiper", { 
         autoplay: { delay: 4000, disableOnInteraction: false }, 
         loop: true, 
@@ -193,7 +190,7 @@ if (empty($banners)) {
         navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
     });
 
-    // Filter Logic
+    // 2. Filter Logic
     const filterBtns = document.querySelectorAll('.filter-btn');
     const items = document.querySelectorAll('.package-item');
     filterBtns.forEach(btn => {
@@ -207,7 +204,7 @@ if (empty($banners)) {
         });
     });
 
-    // Tab Logic
+    // 3. Tab Logic (Integrasi dengan Header Menu)
     window.switchTab = function(name) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         document.getElementById('content-' + name).classList.remove('hidden');
@@ -216,6 +213,18 @@ if (empty($banners)) {
         });
         document.getElementById('tab-' + name).className = 'tab-btn active px-6 py-2 rounded-full text-sm font-bold bg-teal-600 text-white transition';
     };
+
+    // Auto-switch Tab saat URL mengandung Hash (dari Header)
+    function handleHash() {
+        const hash = window.location.hash;
+        if(hash === '#testimoni') switchTab('testi');
+        if(hash === '#tentang') switchTab('about');
+        // #paket tidak perlu switchTab, cukup scroll default
+    }
+    
+    // Listen hash changes & initial load
+    window.addEventListener('hashchange', handleHash);
+    document.addEventListener('DOMContentLoaded', handleHash);
 </script>
 
 <?php get_footer(); ?>
