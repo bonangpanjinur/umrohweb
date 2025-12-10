@@ -4,7 +4,6 @@
  */
 get_header(); 
 
-// 1. AMBIL SEMUA DATA (SINKRON DENGAN FUNCTIONS.PHP)
 $travel_id = get_the_ID();
 $phone = get_post_meta($travel_id, '_travel_phone', true);
 $address = get_post_meta($travel_id, '_travel_address', true);
@@ -12,12 +11,13 @@ $maps_url = get_post_meta($travel_id, '_travel_maps', true);
 $faqs = get_post_meta($travel_id, '_travel_faqs', true) ?: [];
 $testis = get_post_meta($travel_id, '_travel_testis', true) ?: [];
 
-// Banner Logic
+// BANNER LOGIC
 $b1 = get_post_meta($travel_id, '_travel_banner_1', true);
 $b2 = get_post_meta($travel_id, '_travel_banner_2', true);
 $b3 = get_post_meta($travel_id, '_travel_banner_3', true);
 $banners = array_filter([$b1, $b2, $b3]);
 
+// Fallback Banner
 if (empty($banners)) {
     $banners[] = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'full') : 'https://placehold.co/1920x800/0f172a/ffffff?text=Travel+Umroh+Terpercaya';
 }
@@ -50,7 +50,6 @@ if (empty($banners)) {
         <?php endif; ?>
     </div>
 
-    <!-- Text Overlay -->
     <div class="absolute inset-0 z-10 flex items-end pb-12 justify-center pointer-events-none">
         <div class="container mx-auto px-6 text-center pointer-events-auto">
             <h1 class="text-3xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-3"><?php the_title(); ?></h1>
@@ -91,32 +90,74 @@ if (empty($banners)) {
         </div>
     </div>
 
-    <!-- GRID PAKET (ID #paket) -->
+    <!-- GRID PAKET -->
     <div id="paket" class="container mx-auto px-4 md:px-6 py-10 scroll-mt-32">
         <?php if ($packages->have_posts()) : ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php while ($packages->have_posts()) : $packages->the_post(); 
+                // AMBIL DATA DETAIL
                 $price = get_post_meta(get_the_ID(), '_package_price', true);
+                $duration = get_post_meta(get_the_ID(), '_package_duration', true);
+                $airline = get_post_meta(get_the_ID(), '_package_airline', true);
+                $hotel_star = get_post_meta(get_the_ID(), '_package_hotel_star', true);
+                $date = get_post_meta(get_the_ID(), '_package_date', true);
+                
                 $img_src = has_post_thumbnail() ? get_the_post_thumbnail_url(get_the_ID(), 'large') : 'https://placehold.co/600x800/e2e8f0/64748b?text=Paket+Umroh';
                 $post_terms = get_the_terms(get_the_ID(), 'package_category');
                 $filter_classes = ''; if ($post_terms) { foreach ($post_terms as $t) $filter_classes .= ' cat-' . $t->term_id; }
             ?>
+            
+            <!-- CARD PAKET DETAIL -->
             <div class="package-item bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition flex flex-col h-full <?php echo $filter_classes; ?>">
-                <div class="relative aspect-[4/3]">
+                
+                <!-- Image Header -->
+                <div class="relative aspect-[4/3] overflow-hidden">
                     <img src="<?php echo esc_url($img_src); ?>" class="w-full h-full object-cover">
-                    <div class="absolute top-3 left-3 bg-white/90 px-3 py-1 rounded-full text-xs font-bold text-teal-700 uppercase">
+                    <!-- Badge Kategori -->
+                    <div class="absolute top-3 left-3 bg-white/90 px-3 py-1 rounded-full text-xs font-bold text-teal-700 uppercase shadow-sm">
                         <?php echo $post_terms ? $post_terms[0]->name : 'Promo'; ?>
                     </div>
+                    <!-- Badge Tanggal -->
+                    <?php if($date): ?>
+                    <div class="absolute bottom-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm">
+                        📅 <?php echo esc_html($date); ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
+
+                <!-- Card Body -->
                 <div class="p-5 flex flex-col flex-grow">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2 line-clamp-2"><?php the_title(); ?></h3>
-                    <div class="mt-auto flex justify-between items-center pt-4 border-t border-slate-100">
-                        <div class="text-xl font-bold text-teal-600"><?php echo esc_html($price ?: 'Hubungi'); ?></div>
-                        <a href="https://api.whatsapp.com/send?phone=<?php echo esc_attr($phone); ?>&text=Info%20Paket:%20<?php the_title(); ?>" target="_blank" class="bg-slate-900 text-white p-2.5 rounded-lg hover:bg-teal-600 transition">
+                    <h3 class="text-lg font-bold text-slate-800 mb-3 line-clamp-2"><?php the_title(); ?></h3>
+                    
+                    <!-- Detail Grid (INI YANG SEBELUMNYA HILANG) -->
+                    <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-slate-600 mb-4 pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">✈️</span> <?php echo $airline ? esc_html($airline) : 'Direct'; ?>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🏨</span> <?php echo $hotel_star ? 'Bintang ' . esc_html($hotel_star) : 'Hotel *4'; ?>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">⏳</span> <?php echo $duration ? esc_html($duration) : '9 Hari'; ?>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">✅</span> Tersedia
+                        </div>
+                    </div>
+
+                    <!-- Footer: Harga & Tombol -->
+                    <div class="mt-auto flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-slate-400">Mulai dari</p>
+                            <div class="text-xl font-bold text-teal-600"><?php echo esc_html($price ?: 'Hubungi'); ?></div>
+                        </div>
+                        <a href="https://api.whatsapp.com/send?phone=<?php echo esc_attr($phone); ?>&text=Assalamu'alaikum%2C%20saya%20tertarik%20paket%20<?php echo urlencode(get_the_title()); ?>" target="_blank" class="bg-slate-900 text-white p-3 rounded-xl hover:bg-teal-600 transition shadow-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </a>
                     </div>
                 </div>
+                
+                <!-- Full Card Link Overlay -->
                 <a href="https://api.whatsapp.com/send?phone=<?php echo esc_attr($phone); ?>&text=Info%20Paket:%20<?php the_title(); ?>" target="_blank" class="absolute inset-0 z-0"></a>
             </div>
             <?php endwhile; ?>
@@ -127,10 +168,9 @@ if (empty($banners)) {
     </div>
 </div>
 
-<!-- TABS (ID #tentang & #testimoni) -->
+<!-- TABS (Tentang, FAQ, Testi) -->
 <section id="tentang" class="bg-white py-12 scroll-mt-24">
     <div class="container mx-auto px-4 max-w-5xl">
-        <!-- Tab Nav -->
         <div class="flex justify-center gap-2 mb-8 overflow-x-auto pb-2">
             <button onclick="switchTab('about')" id="tab-about" class="tab-btn active px-6 py-2 rounded-full text-sm font-bold bg-teal-600 text-white transition">Tentang</button>
             <button onclick="switchTab('faq')" id="tab-faq" class="tab-btn px-6 py-2 rounded-full text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition">FAQ</button>
@@ -138,7 +178,6 @@ if (empty($banners)) {
         </div>
 
         <div class="min-h-[200px]">
-            <!-- About Content -->
             <div id="content-about" class="tab-content">
                 <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 prose max-w-none text-slate-600">
                     <?php the_content(); ?>
@@ -146,7 +185,6 @@ if (empty($banners)) {
                 </div>
             </div>
             
-            <!-- FAQ Content -->
             <div id="content-faq" class="tab-content hidden space-y-3">
                 <?php if($faqs): foreach($faqs as $faq): ?>
                 <div class="border border-slate-200 rounded-xl overflow-hidden">
@@ -158,8 +196,6 @@ if (empty($banners)) {
                 <?php endforeach; else: echo '<p class="text-center text-slate-400">Belum ada FAQ.</p>'; endif; ?>
             </div>
 
-            <!-- Testimoni Content (ID #testimoni untuk scroll) -->
-            <div id="testimoni"></div>
             <div id="content-testi" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php if($testis): foreach($testis as $testi): 
                     $img = isset($testi['img']) ? $testi['img'] : '';
@@ -179,10 +215,8 @@ if (empty($banners)) {
     </div>
 </section>
 
-<!-- SCRIPTS INTEGRASI (Tab & Filter) -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    // 1. Initialize Swiper
     new Swiper(".mySwiper", { 
         autoplay: { delay: 4000, disableOnInteraction: false }, 
         loop: true, 
@@ -190,7 +224,6 @@ if (empty($banners)) {
         navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
     });
 
-    // 2. Filter Logic
     const filterBtns = document.querySelectorAll('.filter-btn');
     const items = document.querySelectorAll('.package-item');
     filterBtns.forEach(btn => {
@@ -204,7 +237,6 @@ if (empty($banners)) {
         });
     });
 
-    // 3. Tab Logic (Integrasi dengan Header Menu)
     window.switchTab = function(name) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         document.getElementById('content-' + name).classList.remove('hidden');
@@ -213,18 +245,6 @@ if (empty($banners)) {
         });
         document.getElementById('tab-' + name).className = 'tab-btn active px-6 py-2 rounded-full text-sm font-bold bg-teal-600 text-white transition';
     };
-
-    // Auto-switch Tab saat URL mengandung Hash (dari Header)
-    function handleHash() {
-        const hash = window.location.hash;
-        if(hash === '#testimoni') switchTab('testi');
-        if(hash === '#tentang') switchTab('about');
-        // #paket tidak perlu switchTab, cukup scroll default
-    }
-    
-    // Listen hash changes & initial load
-    window.addEventListener('hashchange', handleHash);
-    document.addEventListener('DOMContentLoaded', handleHash);
 </script>
 
 <?php get_footer(); ?>
