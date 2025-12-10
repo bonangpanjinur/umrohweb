@@ -1,32 +1,31 @@
-name: Deploy Plugin to WordPress via SFTP
+name: Deploy Theme to WordPress via FTP
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
+  web-deploy:
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
-    
     steps:
-      # 1. Ambil kode dari repository
-      - name: Checkout Code
+      - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
-      # 2. Upload ke Shared Hosting (Tanpa Build Node.js)
-      - name: FTP Deploy
+      - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@4.3.3
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps 
+          
+          # PERUBAHAN PENTING DI SINI:
+          # Ganti 'ftps' menjadi 'ftp' untuk menghindari error "FIN packet unexpectedly"
+          protocol: ftp
           port: 21
           
-          # Upload semua file dari folder saat ini
+          # Folder lokal dan server
           local-dir: ./
-          
-          # Lokasi di hosting
           server-dir: /public_html/umrohweb.site/wp-content/themes/umrohweb-theme/
           
           # File yang tidak perlu di-upload
@@ -35,5 +34,4 @@ jobs:
             **/.git*/**
             **/node_modules/**
             .github/**
-            .gitignore
             README.md
