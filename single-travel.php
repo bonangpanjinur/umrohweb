@@ -104,7 +104,12 @@ if (empty($banners)) {
                 
                 $img_src = has_post_thumbnail() ? get_the_post_thumbnail_url(get_the_ID(), 'large') : 'https://placehold.co/600x800/e2e8f0/64748b?text=Paket+Umroh';
                 $post_terms = get_the_terms(get_the_ID(), 'package_category');
-                $filter_classes = ''; if ($post_terms) { foreach ($post_terms as $t) $filter_classes .= ' cat-' . $t->term_id; }
+                $filter_classes = ''; 
+                $cat_name = 'Promo';
+                if ($post_terms && !is_wp_error($post_terms)) { 
+                    foreach ($post_terms as $t) $filter_classes .= ' cat-' . $t->term_id; 
+                    $cat_name = $post_terms[0]->name;
+                }
             ?>
             
             <!-- CARD PAKET DETAIL -->
@@ -115,7 +120,7 @@ if (empty($banners)) {
                     <img src="<?php echo esc_url($img_src); ?>" class="w-full h-full object-cover">
                     <!-- Badge Kategori -->
                     <div class="absolute top-3 left-3 bg-white/90 px-3 py-1 rounded-full text-xs font-bold text-teal-700 uppercase shadow-sm">
-                        <?php echo $post_terms ? $post_terms[0]->name : 'Promo'; ?>
+                        <?php echo esc_html($cat_name); ?>
                     </div>
                     <!-- Badge Tanggal -->
                     <?php if($date): ?>
@@ -129,7 +134,7 @@ if (empty($banners)) {
                 <div class="p-5 flex flex-col flex-grow">
                     <h3 class="text-lg font-bold text-slate-800 mb-3 line-clamp-2"><?php the_title(); ?></h3>
                     
-                    <!-- Detail Grid (INI YANG SEBELUMNYA HILANG) -->
+                    <!-- Detail Grid -->
                     <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-slate-600 mb-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">✈️</span> <?php echo $airline ? esc_html($airline) : 'Direct'; ?>
@@ -186,36 +191,41 @@ if (empty($banners)) {
             </div>
             
             <div id="content-faq" class="tab-content hidden space-y-3">
-                <?php if($faqs): foreach($faqs as $faq): ?>
+                <?php if(!empty($faqs)): foreach($faqs as $faq): ?>
                 <div class="border border-slate-200 rounded-xl overflow-hidden">
                     <button class="w-full text-left px-5 py-4 font-bold text-slate-800 bg-white flex justify-between" onclick="this.nextElementSibling.classList.toggle('hidden')">
                         <?php echo esc_html($faq['q']); ?> <span>+</span>
                     </button>
                     <div class="hidden px-5 py-4 bg-slate-50 text-slate-600 border-t border-slate-100 text-sm"><?php echo nl2br(esc_html($faq['a'])); ?></div>
                 </div>
-                <?php endforeach; else: echo '<p class="text-center text-slate-400">Belum ada FAQ.</p>'; endif; ?>
+                <?php endforeach; else: echo '<div class="text-center p-8 bg-slate-50 rounded-xl text-slate-500">Belum ada FAQ.</div>'; endif; ?>
             </div>
 
             <div id="content-testi" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                <?php if($testis): foreach($testis as $testi): 
+                <?php if(!empty($testis)): foreach($testis as $testi): 
                     $img = isset($testi['img']) ? $testi['img'] : '';
                 ?>
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex gap-4 items-start">
-                    <div class="w-12 h-12 rounded-full bg-slate-200 overflow-hidden shrink-0">
-                        <?php if($img): ?><img src="<?php echo esc_url($img); ?>" class="w-full h-full object-cover"><?php endif; ?>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-4 h-full">
+                    <div class="flex gap-4 items-start">
+                        <div class="w-12 h-12 rounded-full bg-slate-200 overflow-hidden shrink-0">
+                            <?php if($img): ?><img src="<?php echo esc_url($img); ?>" class="w-full h-full object-cover"><?php else: ?>
+                                <div class="w-full h-full flex items-center justify-center bg-teal-100 text-teal-600 font-bold"><?php echo substr($testi['name'], 0, 1); ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800"><?php echo esc_html($testi['name']); ?></h4>
+                            <div class="flex text-amber-400 text-xs mt-1">★★★★★</div>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-slate-800"><?php echo esc_html($testi['name']); ?></h4>
-                        <p class="text-sm text-slate-500 mt-1">"<?php echo esc_html($testi['text']); ?>"</p>
-                    </div>
+                    <p class="text-sm text-slate-500 italic">"<?php echo esc_html($testi['text']); ?>"</p>
                 </div>
-                <?php endforeach; else: echo '<p class="text-center text-slate-400 col-span-2">Belum ada testimoni.</p>'; endif; ?>
+                <?php endforeach; else: echo '<div class="col-span-2 text-center p-8 bg-slate-50 rounded-xl text-slate-500">Belum ada testimoni.</div>'; endif; ?>
             </div>
         </div>
     </div>
 </section>
 
-<!-- SECTION TRAVEL LAINNYA (REKOMENDASI) -->
+<!-- SECTION TRAVEL LAINNYA (LOGO DIPERBESAR) -->
 <section class="py-16 bg-slate-50 border-t border-slate-200">
     <div class="container mx-auto px-4 max-w-6xl">
         <div class="text-center mb-10">
@@ -228,35 +238,40 @@ if (empty($banners)) {
             $related_args = array(
                 'post_type' => 'travel',
                 'posts_per_page' => 4,
-                'post__not_in' => array(get_the_ID()), // Kecualikan travel yang sedang dibuka
-                'orderby' => 'rand' // Acak
+                'post__not_in' => array(get_the_ID()),
+                'orderby' => 'rand'
             );
             $related_travels = new WP_Query($related_args);
             
             if($related_travels->have_posts()):
                 while($related_travels->have_posts()): $related_travels->the_post();
-                    $logo = get_post_meta(get_the_ID(), '_travel_logo', true);
-                    $thumb = has_post_thumbnail() ? get_the_post_thumbnail_url(get_the_ID(), 'medium') : 'https://placehold.co/400x300/e2e8f0/64748b?text=Travel';
+                    $rel_id = get_the_ID();
+                    $rel_logo = get_post_meta($rel_id, '_travel_logo', true);
+                    $rel_thumb = has_post_thumbnail() ? get_the_post_thumbnail_url($rel_id, 'medium') : 'https://placehold.co/400x300/e2e8f0/64748b?text=Travel';
             ?>
-            <a href="<?php the_permalink(); ?>" class="group bg-white rounded-xl shadow-sm hover:shadow-md transition border border-slate-100 overflow-hidden block">
+            <a href="<?php the_permalink(); ?>" class="group bg-white rounded-xl shadow-sm hover:shadow-md transition border border-slate-100 overflow-hidden block h-full flex flex-col">
                 <div class="h-32 bg-slate-200 relative overflow-hidden">
-                    <img src="<?php echo esc_url($thumb); ?>" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
-                    <?php if($logo): ?>
-                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-sm border border-slate-100 w-12 h-12 flex items-center justify-center">
-                        <img src="<?php echo esc_url($logo); ?>" class="w-full h-full object-contain">
+                    <img src="<?php echo esc_url($rel_thumb); ?>" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    
+                    <!-- LOGO DIPERBESAR & LEBIH JELAS -->
+                    <?php if($rel_logo): ?>
+                    <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white p-2 rounded-xl shadow-md border border-slate-100 w-16 h-16 flex items-center justify-center z-10 overflow-hidden">
+                        <img src="<?php echo esc_url($rel_logo); ?>" class="w-full h-full object-contain">
                     </div>
                     <?php endif; ?>
                 </div>
-                <div class="pt-8 pb-4 px-4 text-center">
+                <!-- Tambah Padding Atas agar teks tidak tertutup logo -->
+                <div class="pt-10 pb-4 px-4 text-center mt-auto">
                     <h4 class="font-bold text-slate-800 text-sm group-hover:text-teal-600 transition line-clamp-1"><?php the_title(); ?></h4>
                     <span class="text-xs text-teal-500 font-bold mt-2 inline-block bg-teal-50 px-3 py-1 rounded-full">Lihat Profil</span>
                 </div>
             </a>
-            <?php endwhile; wp_reset_postdata(); endif; ?>
+            <?php endwhile; wp_reset_postdata(); else: ?>
+                <div class="col-span-full text-center text-slate-400 py-10">Belum ada travel lain yang terdaftar.</div>
+            <?php endif; ?>
         </div>
         
         <div class="text-center mt-12">
-            <!-- Link ke Archive Travel -->
             <a href="<?php echo get_post_type_archive_link('travel'); ?>" class="inline-block bg-white text-teal-600 border-2 border-teal-600 font-bold px-8 py-3 rounded-full hover:bg-teal-600 hover:text-white transition shadow-sm hover:shadow-md">
                 Lihat Semua Travel &rarr;
             </a>
