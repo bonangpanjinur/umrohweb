@@ -11,13 +11,13 @@ $maps_url = get_post_meta($travel_id, '_travel_maps', true);
 $faqs = get_post_meta($travel_id, '_travel_faqs', true) ?: [];
 $testis = get_post_meta($travel_id, '_travel_testis', true) ?: [];
 
-// BANNER LOGIC
+// BANNER LOGIC (CAROUSEL)
 $b1 = get_post_meta($travel_id, '_travel_banner_1', true);
 $b2 = get_post_meta($travel_id, '_travel_banner_2', true);
 $b3 = get_post_meta($travel_id, '_travel_banner_3', true);
 $banners = array_filter([$b1, $b2, $b3]);
 
-// Fallback Banner
+// Jika kosong, pakai Featured Image
 if (empty($banners)) {
     $banners[] = has_post_thumbnail() ? get_the_post_thumbnail_url($travel_id, 'full') : 'https://placehold.co/1920x800/0f172a/ffffff?text=Travel+Umroh+Terpercaya';
 }
@@ -26,6 +26,7 @@ if (empty($banners)) {
 <!-- SWIPER CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
+    /* Styling Navigasi Slider */
     .swiper-pagination-bullet { background: white; opacity: 0.6; width: 10px; height: 10px; }
     .swiper-pagination-bullet-active { background: #14b8a6; opacity: 1; }
     .swiper-button-next, .swiper-button-prev { color: white; opacity: 0.7; }
@@ -39,10 +40,12 @@ if (empty($banners)) {
             <?php foreach($banners as $banner_img): ?>
             <div class="swiper-slide relative">
                 <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?php echo esc_url($banner_img); ?>');"></div>
+                <!-- Overlay Gradient agar teks terbaca -->
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-90"></div>
             </div>
             <?php endforeach; ?>
         </div>
+        <!-- Pagination & Navigation -->
         <div class="swiper-pagination"></div>
         <?php if(count($banners) > 1): ?>
             <div class="swiper-button-next hidden md:flex"></div>
@@ -50,6 +53,7 @@ if (empty($banners)) {
         <?php endif; ?>
     </div>
 
+    <!-- Text Overlay di Atas Banner -->
     <div class="absolute inset-0 z-10 flex items-end pb-12 justify-center pointer-events-none">
         <div class="container mx-auto px-6 text-center pointer-events-auto">
             <h1 class="text-3xl md:text-6xl font-extrabold text-white drop-shadow-lg mb-3"><?php the_title(); ?></h1>
@@ -60,7 +64,8 @@ if (empty($banners)) {
     </div>
 </section>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN CONTENT (PAKET, TENTANG, DLL) -->
+<!-- Menggunakan margin minus agar sedikit menumpuk banner untuk efek modern -->
 <div class="bg-slate-50 min-h-screen pb-20 -mt-6 relative z-20 rounded-t-3xl shadow-lg">
     
     <?php
@@ -68,7 +73,7 @@ if (empty($banners)) {
     $packages = new WP_Query($args);
     ?>
 
-    <!-- STICKY FILTER MENU -->
+    <!-- STICKY FILTER MENU (Menempel saat scroll) -->
     <div class="sticky top-[80px] z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm py-4">
         <div class="container mx-auto px-4 flex overflow-x-auto gap-3 pb-1 no-scrollbar md:justify-center">
             <button class="filter-btn active whitespace-nowrap px-6 py-2 rounded-full text-sm font-bold bg-teal-600 text-white shadow-md transition-all" data-filter="all">Semua Paket</button>
@@ -129,7 +134,7 @@ if (empty($banners)) {
                 <div class="p-5 flex flex-col flex-grow">
                     <h3 class="text-lg font-bold text-slate-800 mb-3 line-clamp-2"><?php the_title(); ?></h3>
                     
-                    <!-- Detail Grid (INI YANG SEBELUMNYA HILANG) -->
+                    <!-- Detail Grid -->
                     <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-slate-600 mb-4 pb-4 border-b border-slate-100">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">✈️</span> <?php echo $airline ? esc_html($airline) : 'Direct'; ?>
@@ -171,6 +176,7 @@ if (empty($banners)) {
 <!-- TABS (Tentang, FAQ, Testi) -->
 <section id="tentang" class="bg-white py-12 scroll-mt-24">
     <div class="container mx-auto px-4 max-w-5xl">
+        <!-- Tab Nav -->
         <div class="flex justify-center gap-2 mb-8 overflow-x-auto pb-2">
             <button onclick="switchTab('about')" id="tab-about" class="tab-btn active px-6 py-2 rounded-full text-sm font-bold bg-teal-600 text-white transition">Tentang</button>
             <button onclick="switchTab('faq')" id="tab-faq" class="tab-btn px-6 py-2 rounded-full text-sm font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition">FAQ</button>
@@ -178,6 +184,7 @@ if (empty($banners)) {
         </div>
 
         <div class="min-h-[200px]">
+            <!-- About -->
             <div id="content-about" class="tab-content">
                 <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 prose max-w-none text-slate-600">
                     <?php the_content(); ?>
@@ -185,6 +192,7 @@ if (empty($banners)) {
                 </div>
             </div>
             
+            <!-- FAQ -->
             <div id="content-faq" class="tab-content hidden space-y-3">
                 <?php if($faqs): foreach($faqs as $faq): ?>
                 <div class="border border-slate-200 rounded-xl overflow-hidden">
@@ -196,6 +204,7 @@ if (empty($banners)) {
                 <?php endforeach; else: echo '<p class="text-center text-slate-400">Belum ada FAQ.</p>'; endif; ?>
             </div>
 
+            <!-- Testi -->
             <div id="content-testi" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php if($testis): foreach($testis as $testi): 
                     $img = isset($testi['img']) ? $testi['img'] : '';
@@ -215,8 +224,52 @@ if (empty($banners)) {
     </div>
 </section>
 
+<!-- SECTION TRAVEL LAINNYA (REKOMENDASI) -->
+<section class="py-16 bg-slate-50 border-t border-slate-200">
+    <div class="container mx-auto px-4 max-w-6xl">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl font-bold text-slate-800">Cari Pilihan Travel Lain?</h2>
+            <p class="text-slate-500">Lihat rekomendasi travel umroh terpercaya lainnya</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <?php
+            $related_args = array(
+                'post_type' => 'travel',
+                'posts_per_page' => 4,
+                'post__not_in' => array(get_the_ID()), // Kecualikan travel yang sedang dibuka
+                'orderby' => 'rand' // Acak
+            );
+            $related_travels = new WP_Query($related_args);
+            
+            if($related_travels->have_posts()):
+                while($related_travels->have_posts()): $related_travels->the_post();
+                    $logo = get_post_meta(get_the_ID(), '_travel_logo', true);
+                    $thumb = has_post_thumbnail() ? get_the_post_thumbnail_url(get_the_ID(), 'medium') : 'https://placehold.co/400x300/e2e8f0/64748b?text=Travel';
+            ?>
+            <a href="<?php the_permalink(); ?>" class="group bg-white rounded-xl shadow-sm hover:shadow-md transition border border-slate-100 overflow-hidden block h-full flex flex-col">
+                <div class="h-32 bg-slate-200 relative overflow-hidden">
+                    <img src="<?php echo esc_url($thumb); ?>" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <?php if($logo): ?>
+                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-sm border border-slate-100 w-12 h-12 flex items-center justify-center">
+                        <img src="<?php echo esc_url($logo); ?>" class="w-full h-full object-contain">
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <div class="pt-8 pb-4 px-4 text-center mt-auto">
+                    <h4 class="font-bold text-slate-800 text-sm group-hover:text-teal-600 transition line-clamp-1"><?php the_title(); ?></h4>
+                    <span class="text-xs text-teal-500 font-bold mt-2 inline-block bg-teal-50 px-3 py-1 rounded-full">Lihat Profil</span>
+                </div>
+            </a>
+            <?php endwhile; wp_reset_postdata(); endif; ?>
+        </div>
+    </div>
+</section>
+
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
+    // Initialize Swiper
     new Swiper(".mySwiper", { 
         autoplay: { delay: 4000, disableOnInteraction: false }, 
         loop: true, 
@@ -224,6 +277,7 @@ if (empty($banners)) {
         navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" }
     });
 
+    // Filter Logic
     const filterBtns = document.querySelectorAll('.filter-btn');
     const items = document.querySelectorAll('.package-item');
     filterBtns.forEach(btn => {
@@ -237,6 +291,7 @@ if (empty($banners)) {
         });
     });
 
+    // Tab Logic
     window.switchTab = function(name) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         document.getElementById('content-' + name).classList.remove('hidden');
