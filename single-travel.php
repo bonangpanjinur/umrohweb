@@ -37,29 +37,46 @@ if (empty($banners)) {
 </style>
 
 <!-- CAROUSEL BANNER SECTION -->
-<!-- Responsive Height: 45vh di mobile, 65vh di desktop -->
-<section class="relative h-[45vh] md:h-[65vh] bg-slate-900 w-full overflow-hidden">
+<!-- Responsive Height: 50vh di mobile agar gambar portrait lebih muat, 70vh di desktop -->
+<section class="relative h-[50vh] md:h-[70vh] bg-slate-900 w-full overflow-hidden group">
     <div class="swiper mySwiper h-full w-full">
         <div class="swiper-wrapper">
             <?php foreach($banners as $banner_img): ?>
-            <div class="swiper-slide relative">
-                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?php echo esc_url($banner_img); ?>');"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-90"></div>
+            <div class="swiper-slide relative overflow-hidden flex items-center justify-center bg-slate-900">
+                
+                <!-- 1. BLURRED BACKGROUND (Untuk mengisi ruang kosong) -->
+                <div class="absolute inset-0 bg-cover bg-center blur-xl opacity-60 scale-110" 
+                     style="background-image: url('<?php echo esc_url($banner_img); ?>');">
+                </div>
+
+                <!-- 2. MAIN IMAGE (Object Contain agar tidak terpotong) -->
+                <!-- Mobile: contain (utuh), Desktop: contain (utuh) atau cover tergantung selera. Disini kita pakai contain agar teks banner aman -->
+                <img src="<?php echo esc_url($banner_img); ?>" 
+                     class="relative w-full h-full object-contain z-10 shadow-lg" 
+                     alt="<?php the_title(); ?>">
+
+                <!-- 3. GRADIENT OVERLAY (Agar teks putih di atasnya terbaca) -->
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-90 z-20 pointer-events-none"></div>
             </div>
             <?php endforeach; ?>
         </div>
-        <div class="swiper-pagination !bottom-8"></div>
+        
+        <div class="swiper-pagination !bottom-8 z-30"></div>
+        
         <?php if(count($banners) > 1): ?>
-            <div class="swiper-button-next hidden md:flex"></div>
-            <div class="swiper-button-prev hidden md:flex"></div>
+            <div class="swiper-button-next hidden md:flex z-30"></div>
+            <div class="swiper-button-prev hidden md:flex z-30"></div>
         <?php endif; ?>
     </div>
 
-    <div class="absolute inset-0 z-10 flex items-end pb-12 md:pb-16 justify-center pointer-events-none">
+    <!-- HEADER TEXT OVERLAY -->
+    <div class="absolute inset-0 z-30 flex items-end pb-12 md:pb-16 justify-center pointer-events-none">
         <div class="container mx-auto px-4 text-center pointer-events-auto">
             <!-- Responsive Font Size -->
-            <h1 class="text-2xl md:text-5xl lg:text-6xl font-extrabold text-white drop-shadow-lg mb-2 md:mb-4 leading-tight"><?php the_title(); ?></h1>
-            <p class="text-slate-200 text-xs md:text-lg max-w-2xl mx-auto drop-shadow-md px-4">
+            <h1 class="text-2xl md:text-5xl lg:text-6xl font-extrabold text-white drop-shadow-lg mb-2 md:mb-4 leading-tight">
+                <?php the_title(); ?>
+            </h1>
+            <p class="text-slate-200 text-xs md:text-lg max-w-2xl mx-auto drop-shadow-md px-4 bg-black/30 md:bg-transparent py-1 rounded-full backdrop-blur-sm md:backdrop-blur-none inline-block md:inline">
                 Solusi Perjalanan Ibadah Umroh & Haji Terbaik
             </p>
         </div>
