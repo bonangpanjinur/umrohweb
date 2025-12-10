@@ -11,19 +11,18 @@ add_action( 'after_setup_theme', 'umrohweb_theme_setup' );
 
 // === SCRIPT UPLOAD GAMBAR (ADMIN) ===
 function umrohweb_admin_scripts() {
-    // Load media uploader bawaan WordPress
     if ( ! did_action( 'wp_enqueue_media' ) ) {
         wp_enqueue_media();
     }
 }
 add_action( 'admin_enqueue_scripts', 'umrohweb_admin_scripts' );
 
-// Script JS untuk menangani klik tombol upload
+// Script JS untuk tombol upload
 function umrohweb_admin_footer_script() {
     ?>
     <script>
     jQuery(document).ready(function($){
-        $('.upload-btn').click(function(e) {
+        $(document).on('click', '.upload-btn', function(e) {
             e.preventDefault();
             var button = $(this);
             var targetInput = button.siblings('.image-input');
@@ -36,7 +35,9 @@ function umrohweb_admin_footer_script() {
             }).on('select', function() {
                 var attachment = custom_uploader.state().get('selection').first().toJSON();
                 targetInput.val(attachment.url);
-                previewImg.attr('src', attachment.url).show();
+                if(previewImg.length) {
+                    previewImg.attr('src', attachment.url).show();
+                }
             }).open();
         });
     });
@@ -47,45 +48,38 @@ add_action('admin_footer', 'umrohweb_admin_footer_script');
 
 
 // ==========================================================================
-// === BAGIAN 1: PENGATURAN TEMA & CUSTOMIZER ===
+// === BAGIAN 1: CUSTOMIZER (KODE LAMA) ===
 // ==========================================================================
 function umrohweb_customize_register( $wp_customize ) {
     $wp_customize->add_section( 'general_settings', array( 'title' => __( '1. Pengaturan Umum', 'umrohweb' ), 'priority' => 10 ));
     $wp_customize->add_setting( 'brand_name', array( 'default' => 'UmrohWeb ID' ));
     $wp_customize->add_control( 'brand_name_control', array( 'label' => 'Nama Brand', 'section' => 'general_settings', 'settings' => 'brand_name' ));
     $wp_customize->add_setting( 'contact_whatsapp', array( 'default' => '6281283596622' ));
-    $wp_customize->add_control( 'contact_whatsapp_control', array( 'label' => 'Nomor WhatsApp (format 62)', 'section' => 'general_settings', 'settings' => 'contact_whatsapp' ));
+    $wp_customize->add_control( 'contact_whatsapp_control', array( 'label' => 'Nomor WhatsApp', 'section' => 'general_settings', 'settings' => 'contact_whatsapp' ));
 }
 add_action( 'customize_register', 'umrohweb_customize_register' );
 
 
 // ==========================================================================
-// === BAGIAN 2: SISTEM DATA TRAVEL & FLAYER ===
+// === BAGIAN 2: POST TYPES ===
 // ==========================================================================
 
 function create_travel_post_types() {
-    // CPT TRAVEL
-    register_post_type('travel',
-        array(
-            'labels'      => array( 'name' => 'Data Travel', 'singular_name' => 'Travel', 'add_new' => 'Tambah Travel', 'add_new_item' => 'Tambah Data Travel', 'edit_item' => 'Edit Data Travel' ),
-            'public'      => true,
-            'supports'    => array('title', 'editor', 'thumbnail'),
-            'menu_icon'   => 'dashicons-building',
-            'rewrite'     => array('slug' => 'travel'),
-        )
-    );
+    register_post_type('travel', array(
+        'labels' => array( 'name' => 'Data Travel', 'singular_name' => 'Travel', 'add_new' => 'Tambah Travel', 'add_new_item' => 'Tambah Data Travel', 'edit_item' => 'Edit Data Travel' ),
+        'public' => true,
+        'supports' => array('title', 'editor', 'thumbnail'),
+        'menu_icon' => 'dashicons-building',
+        'rewrite' => array('slug' => 'travel'),
+    ));
 
-    // CPT PAKET
-    register_post_type('umroh_package',
-        array(
-            'labels'      => array( 'name' => 'Data Paket/Flayer', 'singular_name' => 'Paket', 'add_new' => 'Tambah Paket', 'add_new_item' => 'Tambah Paket', 'edit_item' => 'Edit Paket' ),
-            'public'      => true,
-            'supports'    => array('title', 'thumbnail'),
-            'menu_icon'   => 'dashicons-tickets-alt',
-        )
-    );
+    register_post_type('umroh_package', array(
+        'labels' => array( 'name' => 'Data Paket', 'singular_name' => 'Paket', 'add_new' => 'Tambah Paket', 'add_new_item' => 'Tambah Paket', 'edit_item' => 'Edit Paket' ),
+        'public' => true,
+        'supports' => array('title', 'thumbnail'),
+        'menu_icon' => 'dashicons-tickets-alt',
+    ));
 
-    // TAXONOMY
     register_taxonomy( 'package_category', 'umroh_package', array(
         'labels' => array('name' => 'Kategori Paket'),
         'rewrite' => array('slug' => 'kategori-paket'),
@@ -108,7 +102,7 @@ function add_travel_meta_boxes() {
 }
 add_action('add_meta_boxes', 'add_travel_meta_boxes');
 
-// --- RENDER FORM TRAVEL (DENGAN TOMBOL UPLOAD) ---
+// --- RENDER FORM TRAVEL ---
 
 function render_travel_details_meta_box($post) {
     $phone = get_post_meta($post->ID, '_travel_phone', true);
@@ -122,7 +116,7 @@ function render_travel_details_meta_box($post) {
             <input type="text" name="travel_logo" class="image-input" value="<?php echo esc_url($logo); ?>" placeholder="URL Logo..." style="flex:1;">
             <button type="button" class="button upload-btn">Upload Logo</button>
         </div>
-        <img class="image-preview" src="<?php echo esc_url($logo); ?>" style="max-height:50px; margin-top:5px; display:<?php echo $logo ? 'block' : 'none'; ?>;">
+        <img class="image-preview" src="<?php echo esc_url($logo); ?>" style="max-height:80px; margin-top:10px; border:1px solid #ddd; padding:5px; background:#eee; display:<?php echo $logo ? 'block' : 'none'; ?>;">
     </p>
     <p><label><strong>WhatsApp:</strong></label><br><input type="text" name="travel_phone" value="<?php echo esc_attr($phone); ?>" style="width:100%;"></p>
     <p><label><strong>Alamat:</strong></label><br><textarea name="travel_address" style="width:100%;" rows="2"><?php echo esc_textarea($address); ?></textarea></p>
@@ -135,20 +129,20 @@ function render_travel_banner_meta_box($post) {
     $b2 = get_post_meta($post->ID, '_travel_banner_2', true);
     $b3 = get_post_meta($post->ID, '_travel_banner_3', true);
     ?>
-    <p><em>Upload gambar banner landscape (1920x800 px).</em></p>
+    <p><em>Klik tombol "Upload" untuk memilih gambar banner.</em></p>
     
-    <div style="margin-bottom:15px;">
-        <label>Banner 1 (Utama):</label>
-        <div style="display:flex; gap:10px;">
+    <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:15px;">
+        <label><strong>Banner 1 (Utama):</strong></label>
+        <div style="display:flex; gap:10px; margin-top:5px;">
             <input type="text" name="travel_banner_1" class="image-input" value="<?php echo esc_url($b1); ?>" style="flex:1;">
             <button type="button" class="button upload-btn">Upload</button>
         </div>
         <img class="image-preview" src="<?php echo esc_url($b1); ?>" style="max-height:100px; margin-top:5px; display:<?php echo $b1 ? 'block' : 'none'; ?>;">
     </div>
 
-    <div style="margin-bottom:15px;">
-        <label>Banner 2:</label>
-        <div style="display:flex; gap:10px;">
+    <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:15px;">
+        <label><strong>Banner 2:</strong></label>
+        <div style="display:flex; gap:10px; margin-top:5px;">
             <input type="text" name="travel_banner_2" class="image-input" value="<?php echo esc_url($b2); ?>" style="flex:1;">
             <button type="button" class="button upload-btn">Upload</button>
         </div>
@@ -156,8 +150,8 @@ function render_travel_banner_meta_box($post) {
     </div>
 
     <div style="margin-bottom:15px;">
-        <label>Banner 3:</label>
-        <div style="display:flex; gap:10px;">
+        <label><strong>Banner 3:</strong></label>
+        <div style="display:flex; gap:10px; margin-top:5px;">
             <input type="text" name="travel_banner_3" class="image-input" value="<?php echo esc_url($b3); ?>" style="flex:1;">
             <button type="button" class="button upload-btn">Upload</button>
         </div>
@@ -191,7 +185,6 @@ function render_travel_extras_meta_box($post) {
                 <input type="text" name="testi_name[]" value="<?php echo esc_attr($testi['name']); ?>" placeholder="Nama" style="width:100%; margin-bottom:5px;">
                 <textarea name="testi_text[]" placeholder="Isi Testimoni" style="width:100%; height:50px; margin-bottom:5px;"><?php echo esc_textarea($testi['text']); ?></textarea>
                 
-                <!-- Upload Foto Testimoni -->
                 <div style="display:flex; gap:5px; align-items:center; margin-bottom:5px;">
                     <input type="text" name="testi_img[]" class="image-input" value="<?php echo esc_url($img); ?>" placeholder="URL Foto" style="flex:1;">
                     <button type="button" class="button upload-btn">Upload Foto</button>
@@ -216,15 +209,6 @@ function render_travel_extras_meta_box($post) {
                    '</div>';
         var el = jQuery(html);
         jQuery('#testi-wrapper').append(el);
-        // Re-bind click event untuk tombol upload baru
-        el.find('.upload-btn').click(function(e) {
-            e.preventDefault();
-            var btn = jQuery(this);
-            var target = btn.siblings('.image-input');
-            var uploader = wp.media({ title: 'Pilih Foto', button: {text: 'Pilih'}, multiple: false })
-                .on('select', function(){ target.val(uploader.state().get('selection').first().toJSON().url); })
-                .open();
-        });
     }
     </script>
     <?php
@@ -266,21 +250,30 @@ function render_package_details_meta_box($post) {
     <?php
 }
 
-// SAVE DATA
+// =======================================================
+// === SAVE DATA (DIPERBAIKI) ===
+// =======================================================
 function save_travel_custom_meta($post_id) {
-    // Travel Meta
+    
+    // 1. Simpan Data Travel (Logo, Banner, Kontak)
     $fields = ['_travel_phone', '_travel_address', '_travel_maps', '_travel_logo', '_travel_banner_1', '_travel_banner_2', '_travel_banner_3'];
     foreach($fields as $f) { 
-        if(isset($_POST[str_replace('_','',$f)])) update_post_meta($post_id, $f, sanitize_text_field($_POST[str_replace('_','',$f)])); 
+        // HAPUS underscore pertama untuk mendapatkan nama input form
+        // _travel_logo -> travel_logo
+        $input_name = substr($f, 1); 
+        
+        if(isset($_POST[$input_name])) {
+            update_post_meta($post_id, $f, sanitize_text_field($_POST[$input_name])); 
+        }
     }
 
-    // FAQ
+    // 2. Simpan FAQ
     if (isset($_POST['faq_q'])) {
         $faqs = []; foreach($_POST['faq_q'] as $i => $q) { if($q) $faqs[] = ['q'=>sanitize_text_field($q), 'a'=>sanitize_textarea_field($_POST['faq_a'][$i])]; }
         update_post_meta($post_id, '_travel_faqs', $faqs);
     }
 
-    // Testimoni
+    // 3. Simpan Testimoni
     if (isset($_POST['testi_name'])) {
         $testis = []; foreach($_POST['testi_name'] as $i => $n) { if($n) $testis[] = [
             'name'=>sanitize_text_field($n), 
@@ -291,7 +284,7 @@ function save_travel_custom_meta($post_id) {
         update_post_meta($post_id, '_travel_testis', $testis);
     }
 
-    // Paket Meta
+    // 4. Simpan Paket
     $pkg_fields = ['related_travel_id', 'package_price', 'package_duration', 'package_airline', 'package_hotel_star', 'package_date'];
     foreach($pkg_fields as $f) { 
         if(isset($_POST[$f])) update_post_meta($post_id, '_'.$f, sanitize_text_field($_POST[$f])); 
