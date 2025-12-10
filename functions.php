@@ -1,5 +1,9 @@
 <?php
 
+// ==========================================================================
+// === BAGIAN 1: PENGATURAN TEMA & CUSTOMIZER (KODE LAMA) ===
+// ==========================================================================
+
 // Fungsi untuk menambahkan panel admin di Customizer
 function umrohweb_customize_register( $wp_customize ) {
 
@@ -109,31 +113,6 @@ function umrohweb_customize_register( $wp_customize ) {
     $wp_customize->add_control('promo_title_control', array('label' => 'Judul Promo', 'section' => 'promo_section', 'settings' => 'promo_title'));
     $wp_customize->add_setting('promo_text', array('default' => 'Pesan Paket Gold atau Platinum sebelum akhir bulan dan dapatkan GRATIS Lisensi Plugin Premium SEO (Senilai Rp 850.000) untuk membantu website Anda lebih mudah ditemukan di Google!'));
     $wp_customize->add_control('promo_text_control', array('label' => 'Teks Penawaran Promo', 'section' => 'promo_section', 'settings' => 'promo_text', 'type' => 'textarea'));
-
-    // === BAGIAN BARU: Testimoni (DIJADIKAN KOMENTAR) ===
-    /*
-    $wp_customize->add_section( 'testimonial_section', array( 'title' => __( '7. Testimoni Klien', 'umrohweb' ), 'priority' => 50 ));
-    $wp_customize->add_setting('testimonial_show', array('default' => true));
-    $wp_customize->add_control('testimonial_show_control', array('label' => 'Tampilkan Bagian Testimoni?', 'section' => 'testimonial_section', 'settings' => 'testimonial_show', 'type' => 'checkbox'));
-    $wp_customize->add_setting('testimonial_title', array('default' => 'Apa Kata Klien Kami'));
-    $wp_customize->add_control('testimonial_title_control', array('label' => 'Judul Section', 'section' => 'testimonial_section', 'settings' => 'testimonial_title'));
-    $wp_customize->add_setting('testimonial_subtitle', array('default' => 'Kepercayaan dan kepuasan mereka adalah prioritas utama kami.'));
-    $wp_customize->add_control('testimonial_subtitle_control', array('label' => 'Sub Judul Section', 'section' => 'testimonial_section', 'settings' => 'testimonial_subtitle'));
-    $testimonial_defaults = [
-        1 => ['name' => 'Bapak Ahmad', 'role' => 'Owner, Travel Berkah', 'text' => 'Pelayanannya luar biasa cepat dan hasilnya sangat profesional. Website baru kami berhasil meningkatkan jumlah jamaah hingga 30% di bulan pertama!'],
-        2 => ['name' => 'Ibu Fatimah', 'role' => 'Marketing, Wisata Nurani', 'text' => 'Desainnya modern dan yang paling penting sangat mudah dikelola. Tim kami bisa update paket umroh sendiri tanpa kesulitan sama sekali. Recommended!'],
-        3 => ['name' => 'Bapak Abdullah', 'role' => 'CEO, Safar Tours', 'text' => 'Sejak punya website dari UmrohWeb ID, citra travel kami jadi lebih terpercaya. Calon jamaah jadi lebih yakin untuk mendaftar. Terima kasih banyak!'],
-    ];
-    for ($i = 1; $i <= 3; $i++) {
-        $wp_customize->add_setting( "testimonial_name_$i", array('default' => $testimonial_defaults[$i]['name']));
-        $wp_customize->add_control("testimonial_name_{$i}_control", array('label' => "Nama Klien #$i", 'section' => 'testimonial_section', 'settings' => "testimonial_name_$i"));
-        $wp_customize->add_setting( "testimonial_role_$i", array('default' => $testimonial_defaults[$i]['role']));
-        $wp_customize->add_control("testimonial_role_{$i}_control", array('label' => "Jabatan/Travel Klien #$i", 'section' => 'testimonial_section', 'settings' => "testimonial_role_$i"));
-        $wp_customize->add_setting( "testimonial_text_$i", array('default' => $testimonial_defaults[$i]['text']));
-        $wp_customize->add_control("testimonial_text_{$i}_control", array('label' => "Isi Testimoni #$i", 'section' => 'testimonial_section', 'settings' => "testimonial_text_$i", 'type' => 'textarea'));
-        $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, "testimonial_image_{$i}_control", array( 'label' => "Foto Klien #$i", 'section' => 'testimonial_section', 'settings' => "testimonial_image_$i" )));
-    }
-    */
 
     // Section FAQ
     $wp_customize->add_section( 'faq_section', array( 'title' => __( '8. FAQ (Pertanyaan Umum)', 'umrohweb' ), 'priority' => 55 )); // Prioritas disesuaikan
@@ -263,3 +242,203 @@ function umrohweb_customize_register( $wp_customize ) {
 }
 add_action( 'customize_register', 'umrohweb_customize_register' );
 
+
+// ==========================================================================
+// === BAGIAN 2: FITUR BARU: SISTEM DATA TRAVEL & FLAYER ===
+// ==========================================================================
+
+function create_travel_post_types() {
+    // 1. CPT: Data Travel (Untuk Profil Perusahaan: Jannah Firdaus, dll)
+    register_post_type('travel',
+        array(
+            'labels'      => array(
+                'name'          => __('Data Travel'),
+                'singular_name' => __('Travel'),
+                'add_new'       => __('Tambah Travel Baru'),
+                'add_new_item'  => __('Tambah Data Travel'),
+                'edit_item'     => __('Edit Data Travel'),
+                'all_items'     => __('Semua Travel'),
+            ),
+            'public'      => true,
+            'has_archive' => false,
+            'supports'    => array('title', 'editor', 'thumbnail'), // Editor untuk "Tentang Perusahaan", Thumbnail untuk Logo/Banner
+            'menu_icon'   => 'dashicons-building',
+            'rewrite'     => array('slug' => 'travel'), // URL nanti jadi: domain.com/travel/nama-travel
+        )
+    );
+
+    // 2. CPT: Paket Umroh (Untuk Flayer)
+    register_post_type('umroh_package',
+        array(
+            'labels'      => array(
+                'name'          => __('Data Flayer/Paket'),
+                'singular_name' => __('Paket'),
+                'add_new'       => __('Tambah Flayer Baru'),
+                'add_new_item'  => __('Tambah Flayer'),
+                'edit_item'     => __('Edit Flayer'),
+                'all_items'     => __('Semua Flayer'),
+            ),
+            'public'      => true,
+            'has_archive' => true,
+            'supports'    => array('title', 'thumbnail'), // Hanya butuh Judul & Gambar Flayer
+            'menu_icon'   => 'dashicons-tickets-alt',
+        )
+    );
+
+    // 3. Taxonomy: Kategori & Sub Kategori
+    register_taxonomy(
+        'package_category',
+        'umroh_package',
+        array(
+            'labels' => array(
+                'name' => 'Kategori Paket',
+                'add_new_item' => 'Tambah Kategori/Sub Kategori',
+            ),
+            'rewrite' => array('slug' => 'kategori-paket'),
+            'hierarchical' => true, // True agar bisa punya Sub-Kategori (Induk -> Anak)
+            'show_admin_column' => true,
+        )
+    );
+}
+add_action('init', 'create_travel_post_types');
+
+
+// === META BOXES: FORM INPUT TAMBAHAN ===
+
+function add_travel_meta_boxes() {
+    // Inputan Khusus di Menu "Data Travel"
+    add_meta_box('travel_details', 'Informasi Kontak Travel', 'render_travel_details_meta_box', 'travel', 'normal', 'high');
+    add_meta_box('travel_extras', 'FAQ & Testimoni', 'render_travel_extras_meta_box', 'travel', 'normal', 'default');
+
+    // Inputan Khusus di Menu "Data Flayer" (Pilih Travel Pemilik)
+    add_meta_box('package_details', 'Hubungkan ke Travel', 'render_package_details_meta_box', 'umroh_package', 'side', 'default');
+}
+add_action('add_meta_boxes', 'add_travel_meta_boxes');
+
+// 1. Form Data Travel (Telepon, Alamat, Maps)
+function render_travel_details_meta_box($post) {
+    $phone = get_post_meta($post->ID, '_travel_phone', true);
+    $address = get_post_meta($post->ID, '_travel_address', true);
+    ?>
+    <p>
+        <label><strong>Nomor Telepon / WhatsApp (Wajib):</strong></label><br>
+        <input type="text" name="travel_phone" value="<?php echo esc_attr($phone); ?>" placeholder="628123456789" style="width:100%;">
+        <small>Nomor ini akan otomatis dipakai di tombol WA semua flayer travel ini.</small>
+    </p>
+    <p>
+        <label><strong>Alamat Kantor:</strong></label><br>
+        <textarea name="travel_address" style="width:100%;" rows="3"><?php echo esc_textarea($address); ?></textarea>
+    </p>
+    <?php
+}
+
+// 2. Form FAQ & Testimoni Travel
+function render_travel_extras_meta_box($post) {
+    // Mengambil data array FAQ & Testimoni
+    $faqs = get_post_meta($post->ID, '_travel_faqs', true) ?: [];
+    $testis = get_post_meta($post->ID, '_travel_testis', true) ?: [];
+    ?>
+    
+    <!-- Input FAQ (Bisa Tambah Banyak) -->
+    <h4>FAQ (Tanya Jawab)</h4>
+    <div id="faq-wrapper">
+        <?php 
+        if(!empty($faqs)) {
+            foreach($faqs as $i => $faq) {
+                echo '<div class="faq-item" style="margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:10px;">
+                    <input type="text" name="faq_q[]" value="'.esc_attr($faq['q']).'" placeholder="Pertanyaan" style="width:100%; margin-bottom:5px;">
+                    <textarea name="faq_a[]" placeholder="Jawaban" style="width:100%;">'.esc_textarea($faq['a']).'</textarea>
+                </div>';
+            }
+        }
+        ?>
+    </div>
+    <button type="button" class="button" onclick="addFaq()">+ Tambah FAQ Lain</button>
+
+    <!-- Input Testimoni -->
+    <hr>
+    <h4>Testimoni Jamaah</h4>
+    <div id="testi-wrapper">
+        <?php 
+        if(!empty($testis)) {
+            foreach($testis as $i => $testi) {
+                echo '<div class="testi-item" style="margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:10px;">
+                    <input type="text" name="testi_name[]" value="'.esc_attr($testi['name']).'" placeholder="Nama Jamaah" style="width:100%; margin-bottom:5px;">
+                    <textarea name="testi_text[]" placeholder="Isi Testimoni" style="width:100%;">'.esc_textarea($testi['text']).'</textarea>
+                </div>';
+            }
+        }
+        ?>
+    </div>
+    <button type="button" class="button" onclick="addTesti()">+ Tambah Testimoni Lain</button>
+
+    <script>
+    function addFaq() {
+        var html = '<div class="faq-item" style="margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:10px;"><input type="text" name="faq_q[]" placeholder="Pertanyaan" style="width:100%; margin-bottom:5px;"><textarea name="faq_a[]" placeholder="Jawaban" style="width:100%;"></textarea></div>';
+        document.getElementById('faq-wrapper').insertAdjacentHTML('beforeend', html);
+    }
+    function addTesti() {
+        var html = '<div class="testi-item" style="margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:10px;"><input type="text" name="testi_name[]" placeholder="Nama Jamaah" style="width:100%; margin-bottom:5px;"><textarea name="testi_text[]" placeholder="Isi Testimoni" style="width:100%;"></textarea></div>';
+        document.getElementById('testi-wrapper').insertAdjacentHTML('beforeend', html);
+    }
+    </script>
+    <?php
+}
+
+// 3. Form Di Flayer: Pilih Travel Pemilik
+function render_package_details_meta_box($post) {
+    $selected_travel = get_post_meta($post->ID, '_related_travel_id', true);
+    $price = get_post_meta($post->ID, '_package_price', true);
+    
+    // Ambil daftar semua travel
+    $travels = get_posts(array('post_type' => 'travel', 'numberposts' => -1, 'post_status' => 'publish'));
+    ?>
+    <p><strong>Pilih Nama Travel:</strong></p>
+    <select name="related_travel_id" style="width:100%;">
+        <option value="">-- Pilih Travel --</option>
+        <?php foreach ($travels as $travel) : ?>
+            <option value="<?php echo $travel->ID; ?>" <?php selected($selected_travel, $travel->ID); ?>>
+                <?php echo esc_html($travel->post_title); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+    <p style="color: #666; font-style: italic; font-size: 12px;">Nomor WA akan otomatis mengambil dari data travel yang dipilih di atas.</p>
+    
+    <p><strong>Harga (Opsional untuk label):</strong></p>
+    <input type="text" name="package_price" value="<?php echo esc_attr($price); ?>" placeholder="Rp 25 Juta">
+    <?php
+}
+
+// Simpan Data
+function save_travel_custom_meta($post_id) {
+    // Save Data Travel
+    if (isset($_POST['travel_phone'])) update_post_meta($post_id, '_travel_phone', sanitize_text_field($_POST['travel_phone']));
+    if (isset($_POST['travel_address'])) update_post_meta($post_id, '_travel_address', sanitize_textarea_field($_POST['travel_address']));
+    
+    // Save FAQ & Testi (Array)
+    if (isset($_POST['faq_q'])) {
+        $faqs = [];
+        for($i=0; $i<count($_POST['faq_q']); $i++) {
+            if(!empty($_POST['faq_q'][$i])) {
+                $faqs[] = ['q' => sanitize_text_field($_POST['faq_q'][$i]), 'a' => sanitize_textarea_field($_POST['faq_a'][$i])];
+            }
+        }
+        update_post_meta($post_id, '_travel_faqs', $faqs);
+    }
+    
+    if (isset($_POST['testi_name'])) {
+        $testis = [];
+        for($i=0; $i<count($_POST['testi_name']); $i++) {
+            if(!empty($_POST['testi_name'][$i])) {
+                $testis[] = ['name' => sanitize_text_field($_POST['testi_name'][$i]), 'text' => sanitize_textarea_field($_POST['testi_text'][$i])];
+            }
+        }
+        update_post_meta($post_id, '_travel_testis', $testis);
+    }
+
+    // Save Data Flayer
+    if (isset($_POST['related_travel_id'])) update_post_meta($post_id, '_related_travel_id', sanitize_text_field($_POST['related_travel_id']));
+    if (isset($_POST['package_price'])) update_post_meta($post_id, '_package_price', sanitize_text_field($_POST['package_price']));
+}
+add_action('save_post', 'save_travel_custom_meta');
+?>
